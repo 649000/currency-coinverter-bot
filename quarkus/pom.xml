@@ -42,12 +42,21 @@
             <artifactId>quarkus-amazon-dynamodb-enhanced</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkiverse.amazonservices</groupId>
-            <artifactId>quarkus-amazon-lambda</artifactId>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-amazon-lambda-http</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-arc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-jackson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots-client</artifactId>
+            <version>7.10.0</version>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>

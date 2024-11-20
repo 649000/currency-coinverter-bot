@@ -21,22 +21,19 @@ public class DynamoDBStack extends Stack {
     public DynamoDBStack(final Construct scope, final String id, final StackProps props) {
         super(scope, id, props);
         tableMap = new HashMap<>();
+        createUserTable();
     }
 
     private void createUserTable() {
         userTable = Table.Builder.create(
                         this,
-                        "notesnest-highlight-table")
+                        "currencycoinverter-user-table")
                 .tableName(USER_TABLE)
                 .billingMode(BillingMode.PROVISIONED)
-//                .partitionKey(Attribute.builder()
-//                        .name("userName")
-//                        .type(AttributeType.STRING)
-//                        .build())
-//                .sortKey(Attribute.builder()
-//                        .name("id")
-//                        .type(AttributeType.STRING)
-//                        .build())
+                .partitionKey(Attribute.builder()
+                        .name("chatId")
+                        .type(AttributeType.NUMBER)
+                        .build())
                 .removalPolicy(RemovalPolicy.RETAIN)
                 .readCapacity(1)
                 .writeCapacity(1)
