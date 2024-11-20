@@ -8,5 +8,6 @@
   <packaging>pom</packaging>
   <modules>
     <module>cdk</module>
+    <module>quarkus</module>
   </modules>
 </project>
