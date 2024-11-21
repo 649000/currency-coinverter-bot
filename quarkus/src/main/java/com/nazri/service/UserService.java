@@ -6,7 +6,8 @@ import com.nazri.util.TimeUtil;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
-import org.telegram.telegrambots.meta.api.objects.chat.Chat;
+import org.telegram.telegrambots.meta.api.objects.Chat;
+
 
 @ApplicationScoped
 public class UserService {

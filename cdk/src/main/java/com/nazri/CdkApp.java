@@ -12,7 +12,11 @@ public class CdkApp {
         App app = new App();
 
         // cdk synth --context env=dev OR --context env=sit OR --context env=uat
-        String environment = (String) app.getNode().tryGetContext("env");
+//        String environment = (String) app.getNode().tryGetContext("env");
+
+           String environment = Constant.DEV;
+
+
         StackConfig stackConfig = getStackConfig(environment);
 
         DynamoDBStack dynamoDBStack = new DynamoDBStack(app, "currencycoinverter-dynamodb-stack", stackConfig.getStackProps()

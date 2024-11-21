@@ -4,6 +4,7 @@ import com.nazri.util.Constant;
 import software.amazon.awscdk.Environment;
 import software.amazon.awscdk.StackProps;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -35,10 +36,12 @@ public class StackConfig {
 
     public static class Builder {
         private final StackProps.Builder stackProps = StackProps.builder();
-        private Map<String, String> tags = Map.of(Constant.PROJECT, Constant.CURRENCYCOINVERTER);
+//        private Map<String, String> tags = Map.of(Constant.PROJECT, Constant.CURRENCYCOINVERTER);
+        private Map<String, String> tags = new HashMap<>();
         private Boolean graalvm;
 
         public Builder withEnvironment(String environment) {
+            tags.put(Constant.PROJECT, Constant.CURRENCYCOINVERTER);
             switch (environment) {
                 case Constant.DEV -> {
                     logger.info("DEV StackConfig");
