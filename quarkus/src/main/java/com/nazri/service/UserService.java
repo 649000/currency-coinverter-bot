@@ -17,7 +17,7 @@ public class UserService {
     @Inject
     UserRepository userRepository;
 
-    public User create(Chat chat){
+    public User create(Chat chat) {
         log.info("Creating New User");
         User user = new User();
         user.setChatId(user.getChatId());
@@ -27,8 +27,12 @@ public class UserService {
         return userRepository.create(user);
     }
 
-    public User findOne(final long chatId){
+    public User findOne(final long chatId) {
         return userRepository.findOne(chatId);
+    }
+
+    public User update(final User user) {
+        return userRepository.update(user);
     }
 
 }
