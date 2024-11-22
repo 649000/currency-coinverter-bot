@@ -1,7 +1,8 @@
 package com.nazri.controller;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
-import com.nazri.service.WebhookService;
+import com.nazri.service.TelegramBot;
+import com.nazri.service.CurrencyService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -18,7 +19,11 @@ public class WebhookController {
     private static final Logger log = Logger.getLogger(WebhookController.class);
 
     @Inject
-    WebhookService webhookService;
+    CurrencyService currencyService;
+
+    @Inject
+    TelegramBot telegramBot;
+
 
     @POST
     @Path("/webhook")
@@ -26,7 +31,7 @@ public class WebhookController {
     @Produces(MediaType.APPLICATION_JSON)
     public Response updates(Update update, @Context APIGatewayV2HTTPEvent event) {
         log.info("APIGatewayV2HTTPEvent: " + event.toString());
-        log.info("Update: " + update);
+        telegramBot.onWebhookUpdateReceived(update);
         return Response.ok()
                 .entity("Update processed successfully")
                 .build();
@@ -35,7 +40,20 @@ public class WebhookController {
     @GET
     @Path("/health")
     public String healthCheck() {
-        return "OK";
+//        Set<String> toCurrencies = new HashSet<>();
+//        toCurrencies.add("MYR");
+//        toCurrencies.add("IDR");
+//        return currencyService.convertCurrency(BigDecimal.valueOf(1.0), "SGD", toCurrencies).toString();
+//        log.info(currencyService.getCurrencyCode("SGD"));
+//        log.info(currencyService.getCurrencyCode("sgd"));
+//        log.info(currencyService.getCurrencyCode("sg"));
+//        log.info(currencyService.getCurrencyCode("SG"));
+//        log.info(currencyService.getCurrencyCode("sG"));
+//        log.info(currencyService.getCurrencyCode("singapore"));
+//        log.info(currencyService.getCurrencyCode("Singapore"));
+//        log.info(currencyService.getCurrencyCode("SinGaPoRe"));
+//        log.info(currencyService.getCurrencyCode("SinGaPoRee"));
+        return "";
     }
 
 }
