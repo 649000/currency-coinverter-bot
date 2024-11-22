@@ -8,8 +8,7 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import software.amazon.awssdk.enhanced.dynamodb.model.GetItemEnhancedRequest;
-import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 @ApplicationScoped
@@ -61,6 +60,21 @@ public class UserRepository {
         } catch (DynamoDbException e) {
             log.error(e.getMessage());
             throw new IllegalArgumentException(e.getMessage());
+        }
+    }
+
+    public User update(final User user) {
+        try {
+
+            UpdateItemEnhancedRequest<User> request = UpdateItemEnhancedRequest.builder(User.class)
+                    .item(user)
+                    .ignoreNullsMode(IgnoreNullsMode.DEFAULT)
+                    .build();
+
+            return userDynamoDbTable.updateItem(request);
+        } catch (DynamoDbException e) {
+            log.error(e.getMessage());
+            throw new IllegalArgumentException("Error updating user: " + e.getMessage());
         }
     }
 }
