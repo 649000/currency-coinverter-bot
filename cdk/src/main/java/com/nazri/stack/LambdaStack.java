@@ -49,7 +49,9 @@ public class LambdaStack extends Stack {
                 .environment(Map.of(
                         "DISABLE_SIGNAL_HANDLER", "true",
                         "quarkus_lambda_handler", "io.quarkus.amazon.lambda.runtime.QuarkusStreamHandler::handleRequest",
-                        "telegram_bot_token", Constant.TELEGRAM_BOT_TOKEN
+                        "telegram_bot_username", Constant.TELEGRAM_BOT_USERNAME,
+                        "telegram_bot_token", Constant.TELEGRAM_BOT_TOKEN,
+                        "telegram_webhook_url", Constant.TELEGRAM_WEBHOOK_URL
                 ))
                 .build();
     }
@@ -64,7 +66,9 @@ public class LambdaStack extends Stack {
                 .handler("io.quarkus.amazon.lambda.runtime.QuarkusStreamHandler::handleRequest")
                 .environment(Map.of(
                         "quarkus_lambda_handler", "io.quarkus.amazon.lambda.runtime.QuarkusStreamHandler::handleRequest",
+                        "telegram_bot_username", Constant.TELEGRAM_BOT_USERNAME,
                         "telegram_bot_token", Constant.TELEGRAM_BOT_TOKEN,
+                        "telegram_webhook_url", Constant.TELEGRAM_WEBHOOK_URL,
                         // For JVM only
                         "JAVA_TOOL_OPTIONS", "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
                 ))
