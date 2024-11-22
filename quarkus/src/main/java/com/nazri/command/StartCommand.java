@@ -25,6 +25,11 @@ public class StartCommand implements Command{
 
     @Override
     public void execute(Message message, String args) {
+
+        if (userService.findOne(message.getChatId()) != null) {
+            // TODO:
+            return ;
+        };
         userService.create(message.getChat());
         SendMessage response = new SendMessage(String.valueOf(message.getChatId()),
                 getBody());
