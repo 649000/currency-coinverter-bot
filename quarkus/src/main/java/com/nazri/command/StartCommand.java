@@ -37,6 +37,10 @@ public class StartCommand implements Command{
 
 
     public String getBody() {
-        return "Welcome to Currency Coinverter Bot";
+        return "Welcome to the Currency Coinverter Bot! " +
+                "I'm here to help you __coinvert__ currencies easily. " +
+                "To get started, just use /to and /from with either currency codes or country names. For example, /to SGD or /to Singapore, and /from MYR or /from Malaysia. " +
+                "Once you've set your currencies, just send me the amount, and I'll do the conversion for you! Let me know what you need, and I'll take care of the rest.";
+
     }
 }

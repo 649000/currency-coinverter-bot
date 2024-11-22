@@ -36,7 +36,7 @@ public class GetCurrencies implements Command {
         User user = userService.findOne(message.getChatId());
 
         response.setText("Input Currency: " + user.getInputCurrency() + "\n" +
-                "Output Currency: " + user.getOutputCurrency().toString() + "\n" +
+                "Output Currency: " + String.valueOf(user.getOutputCurrency()) + "\n" +
                 "You can use /to and /from commands to add your currencies.");
         try {
             telegramBot.execute(response);

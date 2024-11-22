@@ -8,6 +8,8 @@ import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 
+import java.util.HashSet;
+
 
 @ApplicationScoped
 public class UserService {
@@ -21,6 +23,7 @@ public class UserService {
         log.info("Creating New User");
         User user = new User();
         user.setChatId(chat.getId());
+        user.setOutputCurrency(new HashSet<>(3));
         user.setTelegramUsername(chat.getUserName());
         user.setCreatedDate(TimeUtil.getCurrentTime());
         user.setUpdatedDate(TimeUtil.getCurrentTime());

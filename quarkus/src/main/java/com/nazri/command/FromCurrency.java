@@ -43,7 +43,7 @@ public class FromCurrency implements Command {
         response.setChatId(String.valueOf(message.getChatId()));
         response.setParseMode(Constant.MARKDOWN);
 
-        String currencyCode = currencyService.getCurrencyCode(message.getText());
+        String currencyCode = currencyService.getCurrencyCode(args);
         try {
 
             if (currencyCode == null) {
