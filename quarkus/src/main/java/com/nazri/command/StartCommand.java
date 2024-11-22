@@ -2,6 +2,7 @@ package com.nazri.command;
 
 import com.nazri.service.TelegramBot;
 import com.nazri.service.UserService;
+import com.nazri.util.Constant;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -27,6 +28,7 @@ public class StartCommand implements Command{
         userService.create(message.getChat());
         SendMessage response = new SendMessage(String.valueOf(message.getChatId()),
                 getBody());
+        response.setParseMode(Constant.MARKDOWNV2);
 
         try {
             telegramBot.execute(response);
