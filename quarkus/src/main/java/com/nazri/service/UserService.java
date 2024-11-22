@@ -20,7 +20,7 @@ public class UserService {
     public User create(Chat chat) {
         log.info("Creating New User");
         User user = new User();
-        user.setChatId(user.getChatId());
+        user.setChatId(chat.getId());
         user.setTelegramUsername(chat.getUserName());
         user.setCreatedDate(TimeUtil.getCurrentTime());
         user.setUpdatedDate(TimeUtil.getCurrentTime());
