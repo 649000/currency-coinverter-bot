@@ -25,21 +25,23 @@ public class StartCommand implements Command{
 
     @Override
     public void execute(Message message, String args) {
-
-        if (userService.findOne(message.getChatId()) != null) {
-            // TODO:
-            return ;
-        };
-        userService.create(message.getChat());
         SendMessage response = new SendMessage(String.valueOf(message.getChatId()),
                 getBody());
-        response.setParseMode(Constant.MARKDOWNV2);
+        if (userService.findOne(message.getChatId()) != null) {
+            response.setText("Already Init!");
+        } else {
+            userService.create(message.getChat());
+            response.setText(getBody());
+            response.setParseMode(Constant.MARKDOWNV2);
+
+        }
 
         try {
             telegramBot.execute(response);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
+
     }
 
 
