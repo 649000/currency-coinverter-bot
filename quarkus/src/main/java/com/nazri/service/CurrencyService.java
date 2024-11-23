@@ -30,7 +30,7 @@ public class CurrencyService {
 
     private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
 
-    public Map<String, BigDecimal> convertCurrency(BigDecimal amount, String fromCurrency, Set<String> toCurrencies) {
+    public Map<String, BigDecimal> convertCurrency(BigDecimal amount, String fromCurrency, List<String> toCurrencies) {
         validateInputs(amount, fromCurrency, toCurrencies);
 
         try {
@@ -45,7 +45,7 @@ public class CurrencyService {
         }
     }
 
-    private void validateInputs(BigDecimal amount, String fromCurrency, Set<String> toCurrencies) {
+    private void validateInputs(BigDecimal amount, String fromCurrency, List<String> toCurrencies) {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             log.warnf("Invalid amount: " + amount);
 //            throw new WebApplicationException(
@@ -71,7 +71,7 @@ public class CurrencyService {
         }
     }
 
-    private Map<String, BigDecimal> fetchExchangeRates(String fromCurrency, Set<String> toCurrencies) throws IOException, InterruptedException {
+    private Map<String, BigDecimal> fetchExchangeRates(String fromCurrency, List<String> toCurrencies) throws IOException, InterruptedException {
         String url = String.format(apiUrl, fromCurrency.toLowerCase());
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -90,7 +90,7 @@ public class CurrencyService {
         return parseExchangeRates(response.body(), fromCurrency, toCurrencies);
     }
 
-    private Map<String, BigDecimal> parseExchangeRates(String responseBody, String fromCurrency, Set<String> toCurrencies) {
+    private Map<String, BigDecimal> parseExchangeRates(String responseBody, String fromCurrency, List<String> toCurrencies) {
         Map<String, BigDecimal> rates = new HashMap<>();
 
         try (JsonReader jsonReader = Json.createReader(new StringReader(responseBody))) {

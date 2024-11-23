@@ -5,6 +5,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbUpdateBehavior;
 
+import java.util.List;
 import java.util.Set;
 
 @DynamoDbBean
@@ -14,7 +15,7 @@ public class User {
     private long chatId;
     private String telegramUsername;
     private String inputCurrency;
-    private Set<String> outputCurrency;
+    private List<String> outputCurrency;
     private String createdDate;
     private String updatedDate;
     private boolean betaTester;
@@ -44,11 +45,11 @@ public class User {
         this.inputCurrency = inputCurrency;
     }
 
-    public Set<String> getOutputCurrency() {
+    public List<String> getOutputCurrency() {
         return outputCurrency;
     }
 
-    public void setOutputCurrency(Set<String> outputCurrency) {
+    public void setOutputCurrency(List<String> outputCurrency) {
         this.outputCurrency = outputCurrency;
     }
 
