@@ -43,7 +43,7 @@ public class ConvertCommand implements Command {
         try {
             if (!Util.isNumeric(args)) {
                 //Input is not numeric
-                response.setText("Please enter a numeric value to convert .");
+                response.setText("Please enter a numeric value to convert.");
                 telegramBot.execute(response);
                 return;
             }

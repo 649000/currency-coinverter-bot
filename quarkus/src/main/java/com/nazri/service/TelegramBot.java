@@ -125,8 +125,16 @@ public class TelegramBot extends TelegramWebhookBot {
             return;
         } else {
             log.info("Regular Message Received: " + message.getText());
-            message.setText("/help" );
-            processCommand(message);
+
+            SendMessage response = new SendMessage();
+            response.setText("Please enter a numeric value to convert.");
+            response.setChatId(message.getChatId());
+
+            try {
+                execute(response);
+            } catch (TelegramApiException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
