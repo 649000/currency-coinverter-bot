@@ -58,7 +58,6 @@ public class DeleteCurrencyCommand implements Command {
             } else {
                 response.setText("Which currency would you like to delete? 💭");
 
-
                 // Create inline keyboard
                 InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
                 List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
@@ -70,7 +69,7 @@ public class DeleteCurrencyCommand implements Command {
                 for (String currencyCode : user.getOutputCurrency()) {
                     InlineKeyboardButton button1 = new InlineKeyboardButton();
                     button1.setText(currencyCode);
-                    button1.setCallbackData("deletecurrency:" + currencyCode);
+                    button1.setCallbackData(getName() + ":" + currencyCode);
                     rowInline.add(button1);
                 }
 
@@ -110,7 +109,5 @@ public class DeleteCurrencyCommand implements Command {
             log.error(e.getMessage());
             throw new RuntimeException(e);
         }
-
-
     }
 }

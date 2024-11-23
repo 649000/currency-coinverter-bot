@@ -33,27 +33,27 @@ public class HelpCommand implements Command {
     }
 
     private String getBody() {
-        return "Welcome to *Currency Coinverter Bot* 🌍💱\n" +
-                "I can help you with quick and easy currency conversions! Here's how you can get started:\n\n" +
-                "1. *Set your input and output currencies:* \n" +
-                "Use `/from <currency>` and `/to <currency>` to set your preferred currencies.\n" +
-                "_Examples:_\n" +
-                "`/from MYR` 🇲🇾 or `/from Malaysia`\n" +
-                "`/to SGD` 🇸🇬 or `/to Singapore`\n\n" +
-                "2. *Send your amount:*\n" +
-                "Once your currencies are set, just send the amount, and I’ll do the rest! 💡\n\n" +
-                "3. *Store up to 3 currencies:* \n" +
-                "You can save up to 3 output currencies for quick conversions.\n" +
-                "Use `/getcurrencies` to see them, and `/deletecurrency` to remove any.\n\n" +
-                "4. *Set input currency via location:* \n" +
-                "Send your location 🌍 to automatically set your input currency based on where you are.\n\n" +
-                "Let me know if you need more help! 😊";
+        return "*Currency Coinverter Bot Help* 🌍💱\n\n" +
 
+                "Welcome to the help section! Here's how you can use the bot:\n\n" +
 
+                "✨*Commands:*\n\n"+
 
+                "➖*/start* - Get an introduction and instructions on how to use the bot.\n"+
+                "➖*/from <currency code or country name>* – Set your input currency.\n"+
+                "   Example: `/from MYR` or `/from Malaysia`\n"+
+                "➖*/to <currency code or country name>* – Set your output currency.\n"+
+                "   Example: `/to SGD` or `/to Singapore`\n"+
+                "➖*/getcurrencies* – View your selected input and output currency.\n"+
+                "➖*/deletecurrency* – Delete your output currency.\n\n"+
 
+                "⚡️ *Additional Features:*\n\n"+
 
+                "➖*Location-based currency setting:* Send your location 🌍 to automatically detect your input currency based on where you are.\n" +
+                "➖*Currency codes & country names:* You can use either currency codes (e.g., SGD, MYR) or country names (e.g., Singapore, Malaysia) to set the currencies.\n\n" +
 
+                "Once you've set the input and output currencies, simply type the amount you'd like to convert, and I'll handle the rest 💡.\n\n" +
 
+                "If you need more help, just ask! 💬";
     }
 }

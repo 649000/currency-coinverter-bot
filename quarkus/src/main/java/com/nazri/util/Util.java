@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Currency;
+import java.util.HashMap;
 import java.util.Locale;
 
 public class Util {
@@ -73,5 +74,25 @@ public class Util {
     public static String getFlagFromCurrencyCode(final String currencyCode) {
         final String countryCode = getCountryCodeFromCurrency(currencyCode);
         return getFlagEmoji(countryCode);
+    }
+
+    public static HashMap<String, String> topInputCurrencies() {
+        HashMap<String, String> hashMap = new HashMap<>();
+        hashMap.put("THB", "🇹🇭");
+        hashMap.put("MYR", "🇲🇾");
+        hashMap.put("JPY", "🇯🇵");
+        hashMap.put("IDR", "🇮🇩");
+        hashMap.put("KRW", "🇰🇷");
+        return hashMap;
+    }
+
+    public static HashMap<String, String> topOutputCurrencies() {
+        HashMap<String, String> hashMap = new HashMap<>();
+        hashMap.put("SGD", "🇸🇬");
+        hashMap.put("USD", "🇺🇸");
+        hashMap.put("JPY", "🇯🇵");
+        hashMap.put("EUR", "🇪🇺");
+        hashMap.put("GBP", "🇬🇧");
+        return hashMap;
     }
 }

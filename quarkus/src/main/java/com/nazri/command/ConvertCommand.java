@@ -53,7 +53,7 @@ public class ConvertCommand implements Command {
 
                 response.setText("Please set an input currency to convert from. 💡\n" +
                         "You can use the `/from` command. \n" +
-                        "Examples: `/from MYR`, `/from MY`, or `/from Malaysia` 🇲🇾.\n" +
+                        "Examples: `/from MYR`, `/from MY`, or `/from Malaysia`.\n" +
                         "Alternatively, you can simply send us your location, and we'll determine your input currency based on that. 🌍");
 
                 telegramBot.execute(response);
@@ -63,7 +63,7 @@ public class ConvertCommand implements Command {
             if (user.getOutputCurrency().isEmpty()) {
                 response.setText("Please set an output currency to convert to. 💡\n" +
                         "You can use the `/to` command. \n" +
-                        "Examples: `/to SGD`, `/to SG`, or `/to Singapore` 🇸🇬.");
+                        "Examples: `/to SGD`, `/to SG`, or `/to Singapore`.");
 
                 telegramBot.execute(response);
                 return;

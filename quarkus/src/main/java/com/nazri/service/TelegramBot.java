@@ -66,7 +66,11 @@ public class TelegramBot extends TelegramWebhookBot {
         return webhookUrl;
     }
 
-    public void processMessage(Message message) {
+    /**
+     * Process messages sent by user
+     * @param message
+     */
+    private void processMessage(Message message) {
         try {
             if (message.getText() != null) {
                 if (message.getText().startsWith("/" )) {
@@ -85,6 +89,10 @@ public class TelegramBot extends TelegramWebhookBot {
         }
     }
 
+    /**
+     * Process Command related messages sent by user. Eg. /start or /help
+     * @param message
+     */
     private void processCommand(Message message) {
         log.infof("Processing Command: %s", message.getText());
         String[] parts = message.getText().split("\\s+", 2);
@@ -104,9 +112,12 @@ public class TelegramBot extends TelegramWebhookBot {
         }
     }
 
+    /**
+     * Process plain text messages sent by user
+     * @param message
+     */
     private void processRegularMessage(Message message) {
         log.infof("Processing Regular Message: %s", message.getText());
-
 
         if (Util.isNumeric(message.getText())) {
             message.setText("/convert " + message.getText());
@@ -119,13 +130,21 @@ public class TelegramBot extends TelegramWebhookBot {
         }
     }
 
-    public void processLocation(Message message) {
+    /**
+     * Process Location sent by user
+     * @param message
+     */
+    private void processLocation(Message message) {
         String country = Coordinates2Country.country(message.getLocation().getLatitude(), message.getLocation().getLongitude());
         message.setText("/from " + country);
         processCommand(message);
     }
 
-    public void processCallbackQuery(CallbackQuery callbackQuery) {
+    /**
+     * Process Callbacks by user in Inline Keyboard
+     * @param callbackQuery
+     */
+    private void processCallbackQuery(CallbackQuery callbackQuery) {
         log.infof("Processing Callback: %s", callbackQuery.getData());
         try {
             // Process callback data
@@ -143,11 +162,20 @@ public class TelegramBot extends TelegramWebhookBot {
         }
     }
 
-    public void processEditedMessage(Message message) {
+    /**
+     * Process Edited messages by user
+     * @param message
+     */
+    private void processEditedMessage(Message message) {
         log.infof("Processing Edited Message: %s", message.getText());
         SendMessage response = new SendMessage(String.valueOf(message.getChatId()), "Received your edited message" );
     }
 
+    /**
+     * Generic error messages for debugging
+     * @param chatId
+     * @param text
+     */
     private void sendErrorMessage(Long chatId, String text) {
         String body = "Oops, something went wrong! 😕\n\n" +
                 "Don't worry, please try again later and we'll get things back on track. 😊\n\n" +
