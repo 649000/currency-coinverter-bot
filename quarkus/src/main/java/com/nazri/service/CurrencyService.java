@@ -8,6 +8,7 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
+import software.amazon.awssdk.services.dynamodb.endpoints.internal.Value;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -27,6 +28,9 @@ public class CurrencyService {
 
     @ConfigProperty(name = "currency.api.url")
     String apiUrl;
+
+    @ConfigProperty(name = "currency.list.api.url")
+    String currencyListapiUrl;
 
     private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
 
@@ -160,9 +164,42 @@ public class CurrencyService {
         return null;
     }
 
-    public Set<String> getAllCurrencyCodes() {
-        return Currency.getAvailableCurrencies().stream()
-                .map(Currency::getCurrencyCode)
-                .collect(Collectors.toSet());
+//    public HashMap<String, String> getAllCurrencies() {
+//
+//    }
+
+    public void fetchCurrencies() throws IOException, InterruptedException {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(currencyListapiUrl))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new WebApplicationException(
+                    "Failed to fetch exchange rates",
+                    Response.Status.SERVICE_UNAVAILABLE
+            );
+        }
+
+        try (JsonReader jsonReader = Json.createReader(new StringReader(response.body()))) {
+//            JsonObject ratesJson = jsonReader.readObject().getJsonObject(fromCurrency.toLowerCase());
+
+            JsonObject jsonObject = jsonReader.readObject();
+            log.info(jsonObject.toString());
+
+//            for (String toCurrency : toCurrencies) {
+//                String normalizedCurrency = toCurrency.toLowerCase();
+//                if (ratesJson.containsKey(normalizedCurrency)) {
+//                    BigDecimal rate = new BigDecimal(ratesJson.get(normalizedCurrency).toString());
+//                    rates.put(toCurrency.toUpperCase(), rate);
+//                } else {
+//                    log.warnf("No rate found for currency: " + toCurrency);
+//                }
+//            }
+        }
+
+
     }
 }

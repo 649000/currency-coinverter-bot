@@ -12,6 +12,8 @@ import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.io.IOException;
+
 @ApplicationScoped
 @Path("/api/telegram")
 public class WebhookController {
@@ -53,6 +55,14 @@ public class WebhookController {
 //        log.info(currencyService.getCurrencyCode("Singapore"));
 //        log.info(currencyService.getCurrencyCode("SinGaPoRe"));
 //        log.info(currencyService.getCurrencyCode("SinGaPoRee"));
+        try {
+            currencyService.fetchCurrencies();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        ;
         return "";
     }
 
