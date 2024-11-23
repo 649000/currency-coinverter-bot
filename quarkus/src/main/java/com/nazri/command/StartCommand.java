@@ -27,13 +27,10 @@ public class StartCommand implements Command{
     public void execute(Message message, String args) {
         SendMessage response = new SendMessage(String.valueOf(message.getChatId()),
                 getBody());
-        if (userService.findOne(message.getChatId()) != null) {
-            response.setText("Already Init!");
-        } else {
-            userService.create(message.getChat());
-            response.setText(getBody());
-            response.setParseMode(Constant.MARKDOWNV2);
+        response.setParseMode(Constant.MARKDOWNV2);
 
+        if (userService.findOne(message.getChatId()) == null) {
+            userService.create(message.getChat());
         }
 
         try {
@@ -41,15 +38,18 @@ public class StartCommand implements Command{
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
-
     }
 
 
     public String getBody() {
-        return "Welcome to the Currency Coinverter Bot! " +
-                "I'm here to help you __coinvert__ currencies easily. " +
-                "To get started, just use /to and /from with either currency codes or country names. For example, /to SGD or /to Singapore, and /from MYR or /from Malaysia. " +
-                "Once you've set your currencies, just send me the amount, and I'll do the conversion for you! Let me know what you need, and I'll take care of the rest.";
-
+        return "Welcome to *Currency Converter Bot* 🌎💱\\! \n" +
+                "I’m here to make currency conversion simple and fast\\. \n\n" +
+                "✨ *Getting Started:* \n" +
+                "• Use `/to` and `/from` with currency codes or country names\\. \n\n" +
+                "  _Example:_ \n" +
+                "`/from MYR` 🇲🇾 or `/from Malaysia`\\. \n" +
+                "`/to SGD` 🇸🇬 or `/to Singapore` \n" +
+                "• Send me the amount, and I’ll handle the rest 💡\\. \n\n" +
+                "Let’s get started 🚀\\!";
     }
 }

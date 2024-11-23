@@ -1,6 +1,7 @@
 package com.nazri.command;
 
 import com.nazri.model.User;
+import com.nazri.service.CurrencyService;
 import com.nazri.service.TelegramBot;
 import com.nazri.service.UserService;
 import com.nazri.util.Constant;
@@ -12,9 +13,9 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @ApplicationScoped
-public class GetCurrencies implements Command {
+public class FromCurrencyCommand implements Command {
 
-    private static final Logger log = Logger.getLogger(GetCurrencies.class);
+    private static final Logger log = Logger.getLogger(ToCurrencyCommand.class);
 
     @Inject
     UserService userService;
@@ -22,28 +23,42 @@ public class GetCurrencies implements Command {
     @Inject
     TelegramBot telegramBot;
 
+    @Inject
+    CurrencyService currencyService;
+
     @Override
     public String getName() {
-        return "getcurrencies";
+        return "from";
     }
 
+    /**
+     * Users select input currency
+     *
+     * @param message
+     * @param args
+     */
     @Override
     public void execute(Message message, String args) {
         SendMessage response = new SendMessage();
         response.setChatId(String.valueOf(message.getChatId()));
         response.setParseMode(Constant.MARKDOWN);
 
-        User user = userService.findOne(message.getChatId());
-
-        response.setText("Input Currency: " + user.getInputCurrency() + "\n" +
-                "Output Currency: " + String.valueOf(user.getOutputCurrency()) + "\n" +
-                "You can use /to and /from commands to add your currencies.");
+        String currencyCode = currencyService.getCurrencyCode(args);
         try {
-            telegramBot.execute(response);
+
+            if (currencyCode == null) {
+                response.setText("Please try again, you've entered invalid currency code / country");
+                telegramBot.execute(response);
+            } else {
+                User user = userService.findOne(message.getChatId());
+                user.setInputCurrency(currencyCode);
+                userService.update(user);
+                response.setText("New Input Currency Code Saved: " + currencyCode);
+                telegramBot.execute(response);
+            }
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
             throw new RuntimeException(e);
         }
     }
-
 }

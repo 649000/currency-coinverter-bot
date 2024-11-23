@@ -19,9 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
-public class DeleteCurrency implements Command {
+public class DeleteCurrencyCommand implements Command {
 
-    private static final Logger log = Logger.getLogger(DeleteCurrency.class);
+    private static final Logger log = Logger.getLogger(DeleteCurrencyCommand.class);
 
     @Inject
     UserService userService;
@@ -97,6 +97,7 @@ public class DeleteCurrency implements Command {
 
             User user = userService.findOne(callbackQuery.getMessage().getChatId());
             user.getOutputCurrency().remove(data);
+            // FIXME: Cannot delete last item in set.
             userService.update(user);
 
             telegramBot.execute(response);

@@ -13,9 +13,9 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @ApplicationScoped
-public class FromCurrency implements Command {
+public class ToCurrencyCommand implements Command {
 
-    private static final Logger log = Logger.getLogger(ToCurrency.class);
+    private static final Logger log = Logger.getLogger(ToCurrencyCommand.class);
 
     @Inject
     UserService userService;
@@ -28,11 +28,11 @@ public class FromCurrency implements Command {
 
     @Override
     public String getName() {
-        return "from";
+        return "to";
     }
 
     /**
-     * Users select input currency
+     * Users select currency output
      *
      * @param message
      * @param args
@@ -51,9 +51,9 @@ public class FromCurrency implements Command {
                 telegramBot.execute(response);
             } else {
                 User user = userService.findOne(message.getChatId());
-                user.setInputCurrency(currencyCode);
+                user.getOutputCurrency().add(currencyCode);
                 userService.update(user);
-                response.setText("New Input Currency Code Saved: " + currencyCode);
+                response.setText("New Output Currency Code Saved: " + currencyCode);
                 telegramBot.execute(response);
             }
         } catch (TelegramApiException e) {
