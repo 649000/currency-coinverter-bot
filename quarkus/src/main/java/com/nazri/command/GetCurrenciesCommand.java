@@ -37,10 +37,14 @@ public class GetCurrenciesCommand implements Command {
         User user = userService.findOne(message.getChatId());
 
         StringBuilder body = new StringBuilder();
-
         // Add input currency
         body.append("Your Input Currency:\n");
-        body.append("1. ").append(Util.getFlagFromCurrencyCode(user.getInputCurrency())).append(" <b>").append(user.getInputCurrency()).append("</b>\n\n");
+        if (user.getInputCurrency() == null) {
+            body.append("\n\n");
+        } else {
+            body.append("1. ").append(Util.getFlagFromCurrencyCode(user.getInputCurrency())).append(" <b>").append(user.getInputCurrency()).append("</b>\n\n");
+        }
+
 
         // Add output currencies
         body.append("Your Output Currencies:\n");
@@ -48,6 +52,10 @@ public class GetCurrenciesCommand implements Command {
             body.append(i + 1).append(". ").append(Util.getFlagFromCurrencyCode(user.getOutputCurrency().get(i))).append(" <b>").append(user.getOutputCurrency().get(i)).append("</b> \n");
         }
 
+
+        if (user.getInputCurrency() == null || user.getOutputCurrency().isEmpty()) {
+            body.append("\n\n Use /help to know more on setting your input/output currencies");
+        }
         response.setText(body.toString());
 
         try {
