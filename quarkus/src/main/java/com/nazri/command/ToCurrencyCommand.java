@@ -56,13 +56,22 @@ public class ToCurrencyCommand implements Command {
                 telegramBot.execute(response);
             } else {
                 User user = userService.findOne(message.getChatId());
-                user.getOutputCurrency().add(currencyCode);
-                userService.update(user);
-                response.setText(
-                        "Your new output currency has been saved as *"+ currencyCode +"*. \n" +
-                                "You can now use this currency for conversions! \n\n" +
-                                "Output Currencies: *" + String.join(", ", user.getOutputCurrency()) + "*"
-                );
+
+                if(user.getOutputCurrency().size() >= 3 ){
+                    response.setText(
+                      "Please delete your stored output currency before adding more.\n\n" +
+                      "Use /deletecurrency to delete currencies"
+                    );
+                } else {
+                    user.getOutputCurrency().add(currencyCode);
+                    userService.update(user);
+                    response.setText(
+                            "Your new output currency has been saved as *"+ currencyCode +"*. \n" +
+                                    "You can now use this currency for conversions! \n\n" +
+                                    "Output Currencies: *" + String.join(", ", user.getOutputCurrency()) + "*"
+                    );
+                }
+
                 telegramBot.execute(response);
             }
         } catch (TelegramApiException e) {
