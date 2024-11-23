@@ -2,6 +2,8 @@ package com.nazri.service;
 
 import com.nazri.command.Command;
 import com.nazri.command.CommandRegistry;
+import com.nazri.util.Constant;
+import com.nazri.util.Util;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -12,12 +14,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @ApplicationScoped
 public class TelegramBot extends TelegramWebhookBot {
@@ -35,6 +32,9 @@ public class TelegramBot extends TelegramWebhookBot {
 
     @Inject
     CommandRegistry commandRegistry;
+
+    @Inject
+    CurrencyService currencyService;
 
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
@@ -68,7 +68,6 @@ public class TelegramBot extends TelegramWebhookBot {
         return webhookUrl;
     }
 
-
     public void processMessage(Message message) {
         try {
             if (message.getText() != null) {
@@ -99,20 +98,29 @@ public class TelegramBot extends TelegramWebhookBot {
                 sendErrorMessage(message.getChatId(), e.getMessage());
             }
         } else {
-//            sendUnknownCommandMessage(message.chat().id());
+            sendUnknownCommandMessage(message.getChatId());
         }
     }
 
     private void processRegularMessage(Message message) {
         log.infof("Processing Regular Message: %s", message.getText());
+
+
+        if (Util.isNumeric(message.getText())){
+            message.setText("/convert " + message.getText());
+            processCommand(message);
+            return;
+        }
+
         String body = String.format("Got it! You said: \n\n *%s* \n\n" +
                 "If you'd like to share more, I'm here to listen!", message.getText());
 
 
-        SendMessage outputMessage = new SendMessage(message.getChatId().toString(), body);
+        SendMessage response = new SendMessage(String.valueOf(message.getChatId()), body);
         try {
-            execute(outputMessage);
+            execute(response);
         } catch (TelegramApiException e) {
+            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -138,8 +146,7 @@ public class TelegramBot extends TelegramWebhookBot {
 
     public void processEditedMessage(Message message) {
         log.infof("Processing Edited Message: %s", message.getText());
-        SendMessage outputMessage = new SendMessage(message.getChatId().toString(), "Received your edited message");
-//        bot.execute(outputMessage);
+        SendMessage response = new SendMessage(String.valueOf(message.getChatId()), "Received your edited message");
     }
 
     private void sendErrorMessage(Long chatId, String text) {
@@ -148,10 +155,12 @@ public class TelegramBot extends TelegramWebhookBot {
                 "If the issue persists, here's the info for debugging:\n" +
                 text;
 
-        SendMessage message = new SendMessage(chatId.toString(), body);
+        SendMessage response = new SendMessage(String.valueOf(chatId), body);
+        response.setParseMode(Constant.MARKDOWN);
         try {
-            execute(message);
+            execute(response);
         } catch (TelegramApiException e) {
+            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -160,61 +169,16 @@ public class TelegramBot extends TelegramWebhookBot {
         String body = "Hmm, I didn't quite catch that. 😅\n\n" +
                 "No worries! Type /help to see the list of available commands. I'm here to assist! 😊";
 
-        SendMessage message = new SendMessage(String.valueOf(chatId), body);
-        message.setParseMode("Markdown");
+        SendMessage response = new SendMessage(String.valueOf(chatId), body);
+        response.setParseMode(Constant.MARKDOWN);
 
         try {
-            execute(message);
+            execute(response);
         } catch (TelegramApiException e) {
+            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
     }
-
-
-//    private SendMessage handleMessage(Update update) {
-//        long chatId = update.getMessage().getChatId();
-//        String text = update.getMessage().getText();
-//
-//        log.infof("Received message from %d: %s", chatId, text);
-//
-//        SendMessage message = new SendMessage();
-//        message.setChatId(chatId);
-//        message.setText("You said: " + text);
-//
-//        // Create inline keyboard
-//        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-//        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
-//
-//        // First row of buttons
-//        List<InlineKeyboardButton> rowInline = new ArrayList<>();
-//
-//        // Create buttons
-//        InlineKeyboardButton button1 = new InlineKeyboardButton();
-//        button1.setText("Option 1");
-//        button1.setCallbackData("OPTION1_CALLBACK");
-//
-//        InlineKeyboardButton button2 = new InlineKeyboardButton();
-//        button2.setText("Option 2");
-//        button2.setCallbackData("OPTION2_CALLBACK");
-//
-//        // Add buttons to the row
-//        rowInline.add(button1);
-//        rowInline.add(button2);
-//
-//        // Add the row to rows list
-//        rowsInline.add(rowInline);
-//
-//        // Set the keyboard to the message
-//        markupInline.setKeyboard(rowsInline);
-//        message.setReplyMarkup(markupInline);
-//        try {
-//            execute(message);
-//        } catch (TelegramApiException e) {
-//            throw new RuntimeException(e);
-//        }
-//        return message;
-//    }
-
 
     /**
      * TODO:
