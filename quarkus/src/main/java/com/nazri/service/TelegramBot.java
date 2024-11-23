@@ -4,6 +4,7 @@ import com.nazri.command.Command;
 import com.nazri.command.CommandRegistry;
 import com.nazri.util.Constant;
 import com.nazri.util.Util;
+import io.github.coordinates2country.Coordinates2Country;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -21,20 +22,17 @@ public class TelegramBot extends TelegramWebhookBot {
 
     private static final Logger log = Logger.getLogger(TelegramBot.class);
 
-    @ConfigProperty(name = "telegram.bot.username")
+    @ConfigProperty(name = "telegram.bot.username" )
     String botUsername;
 
-    @ConfigProperty(name = "telegram.bot.token")
+    @ConfigProperty(name = "telegram.bot.token" )
     String botToken;
 
-    @ConfigProperty(name = "telegram.webhook.url")
+    @ConfigProperty(name = "telegram.webhook.url" )
     String webhookUrl;
 
     @Inject
     CommandRegistry commandRegistry;
-
-    @Inject
-    CurrencyService currencyService;
 
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
@@ -71,11 +69,15 @@ public class TelegramBot extends TelegramWebhookBot {
     public void processMessage(Message message) {
         try {
             if (message.getText() != null) {
-                if (message.getText().startsWith("/")) {
+                if (message.getText().startsWith("/" )) {
                     processCommand(message);
                 } else {
                     processRegularMessage(message);
                 }
+            } else if (message.getLocation() != null) {
+                processLocation(message);
+            } else {
+                log.warn("Unknown Message Type: " + message);
             }
         } catch (Exception e) {
             log.error("Error processing message: ", e);
@@ -106,31 +108,28 @@ public class TelegramBot extends TelegramWebhookBot {
         log.infof("Processing Regular Message: %s", message.getText());
 
 
-        if (Util.isNumeric(message.getText())){
+        if (Util.isNumeric(message.getText())) {
             message.setText("/convert " + message.getText());
             processCommand(message);
             return;
-        }
-
-        String body = String.format("Got it! You said: \n\n *%s* \n\n" +
-                "If you'd like to share more, I'm here to listen!", message.getText());
-
-
-        SendMessage response = new SendMessage(String.valueOf(message.getChatId()), body);
-        try {
-            execute(response);
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
-            throw new RuntimeException(e);
+        } else {
+            log.info("Regular Message Received: " + message.getText());
+            message.setText("/help" );
+            processCommand(message);
         }
     }
 
+    public void processLocation(Message message) {
+        String country = Coordinates2Country.country(message.getLocation().getLatitude(), message.getLocation().getLongitude());
+        message.setText("/from " + country);
+        processCommand(message);
+    }
 
     public void processCallbackQuery(CallbackQuery callbackQuery) {
         log.infof("Processing Callback: %s", callbackQuery.getData());
         try {
             // Process callback data
-            String[] parts = callbackQuery.getData().split(":");
+            String[] parts = callbackQuery.getData().split(":" );
             String commandName = parts[0];
             String data = parts.length > 1 ? parts[1] : "";
 
@@ -146,7 +145,7 @@ public class TelegramBot extends TelegramWebhookBot {
 
     public void processEditedMessage(Message message) {
         log.infof("Processing Edited Message: %s", message.getText());
-        SendMessage response = new SendMessage(String.valueOf(message.getChatId()), "Received your edited message");
+        SendMessage response = new SendMessage(String.valueOf(message.getChatId()), "Received your edited message" );
     }
 
     private void sendErrorMessage(Long chatId, String text) {
