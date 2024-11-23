@@ -4,6 +4,7 @@ import com.nazri.model.User;
 import com.nazri.service.TelegramBot;
 import com.nazri.service.UserService;
 import com.nazri.util.Constant;
+import com.nazri.util.Util;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
@@ -31,13 +32,24 @@ public class GetCurrenciesCommand implements Command {
     public void execute(Message message, String args) {
         SendMessage response = new SendMessage();
         response.setChatId(String.valueOf(message.getChatId()));
-        response.setParseMode(Constant.MARKDOWN);
+        response.setParseMode(Constant.HTML);
 
         User user = userService.findOne(message.getChatId());
 
-        response.setText("Input Currency: " + user.getInputCurrency() + "\n" +
-                "Output Currency: " + String.valueOf(user.getOutputCurrency()) + "\n" +
-                "You can use /to and /from commands to add your currencies.");
+        StringBuilder body = new StringBuilder();
+
+        // Add input currency
+        body.append("Your Input Currency:\n");
+        body.append("1. ").append(Util.getFlagFromCurrencyCode(user.getInputCurrency())).append(" <b>").append(user.getInputCurrency()).append("</b>\n\n");
+
+        // Add output currencies
+        body.append("Your Output Currencies:\n");
+        for (int i = 0; i < user.getOutputCurrency().size(); i++) {
+            body.append(i + 1).append(". ").append(Util.getFlagFromCurrencyCode(user.getOutputCurrency().get(i))).append(" <b>").append(user.getOutputCurrency().get(i)).append("</b> \n");
+        }
+
+        response.setText(body.toString());
+
         try {
             telegramBot.execute(response);
         } catch (TelegramApiException e) {

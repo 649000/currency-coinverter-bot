@@ -27,7 +27,7 @@ public class StartCommand implements Command{
     public void execute(Message message, String args) {
         SendMessage response = new SendMessage(String.valueOf(message.getChatId()),
                 getBody());
-        response.setParseMode(Constant.MARKDOWNV2);
+        response.setParseMode(Constant.MARKDOWN);
 
         if (userService.findOne(message.getChatId()) == null) {
             userService.create(message.getChat());
@@ -42,14 +42,18 @@ public class StartCommand implements Command{
 
 
     public String getBody() {
-        return "Welcome to *Currency Converter Bot* 🌎💱\\! \n" +
-                "I’m here to make currency conversion simple and fast\\. \n\n" +
+        return "Welcome to *Currency Coinverter Bot* 🌎💱! \n" +
+                "I’m here to make currency conversion simple and fast. \n\n" +
                 "✨ *Getting Started:* \n" +
-                "• Use `/to` and `/from` with currency codes or country names\\. \n\n" +
-                "  _Example:_ \n" +
-                "`/from MYR` 🇲🇾 or `/from Malaysia`\\. \n" +
-                "`/to SGD` 🇸🇬 or `/to Singapore` \n" +
-                "• Send me the amount, and I’ll handle the rest 💡\\. \n\n" +
-                "Let’s get started 🚀\\!";
+                "• Set your input and output currencies using `/from` and `/to` with currency codes or country names. \n\n" +
+                "_Examples:_ \n" +
+                "`/from MYR` 🇲🇾 or `/from Malaysia`. \n" +
+                "_Alternatively, send your location 🌍 to automatically set your input currency based on where you are._\n\n"+
+                "`/to SGD` 🇸🇬 or `/to Singapore` \n\n" +
+
+                "• Send me the amount, and I’ll handle the rest 💡. \n\n" +
+                "Let’s get started 🚀!";
+
+
     }
 }

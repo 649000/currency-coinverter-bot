@@ -43,7 +43,7 @@ public class ConvertCommand implements Command {
         try {
             if (!Util.isNumeric(args)) {
                 //Input is not numeric
-                response.setText("Please enter a numeric figure to convert");
+                response.setText("Please enter a numeric value to convert .");
                 telegramBot.execute(response);
                 return;
             }
@@ -51,18 +51,20 @@ public class ConvertCommand implements Command {
             User user = userService.findOne(message.getChatId());
             if (user.getInputCurrency() == null) {
 
-                response.setText("Please set an input currency to convert from. \n " +
-                        "You may use the /from command. " +
-                        "Examples: /from myr, /from my, or /from Malaysia \n" +
-                        "You can also simply send us your location, we''determine your input currency");
+                response.setText("Please set an input currency to convert from. 💡\n" +
+                        "You can use the `/from` command. \n" +
+                        "Examples: `/from MYR`, `/from MY`, or `/from Malaysia` 🇲🇾.\n" +
+                        "Alternatively, you can simply send us your location, and we'll determine your input currency based on that. 🌍");
+
                 telegramBot.execute(response);
                 return;
             }
 
             if (user.getOutputCurrency().isEmpty()) {
-                response.setText("Please set an output currency to convert to. \n " +
-                        "You may use the /to command. " +
-                        "Examples: /to sgd, /to sg, or /to Singapore");
+                response.setText("Please set an output currency to convert to. 💡\n" +
+                        "You can use the `/to` command. \n" +
+                        "Examples: `/to SGD`, `/to SG`, or `/to Singapore` 🇸🇬.");
+
                 telegramBot.execute(response);
                 return;
             }
@@ -70,15 +72,15 @@ public class ConvertCommand implements Command {
             Map<String, BigDecimal> result = currencyService.convertCurrency(BigDecimal.valueOf(Long.parseLong(args)), user.getInputCurrency(), user.getOutputCurrency());
 
             StringBuilder sb = new StringBuilder();
-            sb.append("Converted Currency: \n");
-            sb.append("FROM: " + user.getInputCurrency() + " " + args + "\n");
-            sb.append("TO CURRENCIES: \n");
+            sb.append("💵*Coinverted Currencies* 💵\n\n");
+            sb.append("*From*\n");
+            sb.append(user.getInputCurrency()).append(" ").append(args).append("\n\n");
+            sb.append("*To*\n");
             for (String currencyCode : user.getOutputCurrency()) {
                 if (result.containsKey(currencyCode)) {
-                    sb.append(currencyCode + ": " + result.get(currencyCode));
+                    sb.append(currencyCode).append(" ").append(result.get(currencyCode)).append("\n");
                 }
             }
-
             response.setText(sb.toString());
             telegramBot.execute(response);
         } catch (TelegramApiException e) {

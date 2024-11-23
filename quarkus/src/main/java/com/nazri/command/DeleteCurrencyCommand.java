@@ -49,10 +49,15 @@ public class DeleteCurrencyCommand implements Command {
         try {
 
             if (user.getOutputCurrency().isEmpty()) {
-                response.setText("No currencies to delete, try adding your desired currency using /to command. for example /to sg");
+                response.setText("It looks like you don’t have any currencies to delete yet. 🤔\n" +
+                        "To get started, add your desired currency using the `/to` command. \n" +
+                        "_Example:_ \n" +
+                        "`/to SGD` 🇸🇬 or `/to Singapore`.");
+
                 telegramBot.execute(response);
             } else {
-                response.setText("Which currency would you like to delete?");
+                response.setText("Which currency would you like to delete? 💭");
+
 
                 // Create inline keyboard
                 InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
@@ -93,12 +98,12 @@ public class DeleteCurrencyCommand implements Command {
             SendMessage response = new SendMessage();
             response.setChatId(String.valueOf(callbackQuery.getMessage().getChatId()));
             response.setParseMode(Constant.MARKDOWN);
-            response.setText("Currency Deleted: " + data);
+            response.setText("The currency *" + data + "* has been deleted ✅.");
 
             User user = userService.findOne(callbackQuery.getMessage().getChatId());
-            user.getOutputCurrency().remove(data);
-            // FIXME: Cannot delete last item in set.
-            userService.update(user);
+            if(user.getOutputCurrency().remove(data)) {
+                userService.update(user);
+            }
 
             telegramBot.execute(response);
         } catch (TelegramApiException e) {

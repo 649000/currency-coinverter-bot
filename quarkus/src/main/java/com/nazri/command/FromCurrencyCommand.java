@@ -47,13 +47,21 @@ public class FromCurrencyCommand implements Command {
         try {
 
             if (currencyCode == null) {
-                response.setText("Please try again, you've entered invalid currency code / country");
+                String body = "Oops, it looks like you've entered an invalid currency code or country! 😕\n\n" +
+                        "Please use a valid currency code (e.g., `SGD`, `MYR`, `JPY`) or a full country name (e.g., `Singapore`, `Malaysia`, `Japan`). \n\n" +
+                        "_Example:_ \n" +
+                        "`/from MYR` 🇲🇾 or `/from Malaysia`."+
+                        "_Alternatively, send your location 🌍 to automatically set your input currency based on where you are._";
+
+                response.setText(body);
                 telegramBot.execute(response);
             } else {
                 User user = userService.findOne(message.getChatId());
                 user.setInputCurrency(currencyCode);
                 userService.update(user);
-                response.setText("New Input Currency Code Saved: " + currencyCode);
+                response.setText(
+                        "Your input currency has been saved as *" + currencyCode + "*. \n" +
+                                "You can now use this currency for conversions!");
                 telegramBot.execute(response);
             }
         } catch (TelegramApiException e) {
