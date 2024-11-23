@@ -38,6 +38,7 @@ public class UserService {
     public User update(final User user) {
         // Remove duplicates
         user.setOutputCurrency(user.getOutputCurrency().stream().distinct().collect(Collectors.toList()));
+        log.info("Updating User: " + user.toString());
         return userRepository.update(user);
     }
 
