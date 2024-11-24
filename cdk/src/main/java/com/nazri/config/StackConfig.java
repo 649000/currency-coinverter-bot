@@ -36,7 +36,6 @@ public class StackConfig {
 
     public static class Builder {
         private final StackProps.Builder stackProps = StackProps.builder();
-//        private Map<String, String> tags = Map.of(Constant.PROJECT, Constant.CURRENCYCOINVERTER);
         private Map<String, String> tags = new HashMap<>();
         private Boolean graalvm;
 

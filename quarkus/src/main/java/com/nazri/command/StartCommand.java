@@ -49,12 +49,14 @@ public class StartCommand implements Command {
 
                 "➖*Set your input currency*: Use `/from <currency code>` or `/from <country name>`.\n" +
                 "  Example:\n" +
+                "  `/from MY`\n" +
                 "  `/from MYR`\n" +
                 "  `/from Malaysia`\n\n" +
                 "  Alternatively, send your location 🌍 to automatically set your input currency based on your current location.\n\n" +
 
                 "➖*Set your output currency*: Use `/to <currency code>` or `/to <country name>`.\n" +
                 "  Example:\n" +
+                "  `/to SG`\n" +
                 "  `/to SGD`\n" +
                 "  `/to Singapore`\n\n" +
 

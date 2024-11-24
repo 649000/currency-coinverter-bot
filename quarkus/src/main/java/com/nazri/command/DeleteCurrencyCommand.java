@@ -52,7 +52,7 @@ public class DeleteCurrencyCommand implements Command {
                 response.setText("It looks like you don’t have any currencies to delete yet. 🤔\n" +
                         "To get started, add your desired currency using the `/to` command. \n" +
                         "_Example:_ \n" +
-                        "`/to SGD` 🇸🇬 or `/to Singapore`.");
+                        "`/to SG`, `/to SGD` or `/to Singapore`.");
 
                 telegramBot.execute(response);
             } else {

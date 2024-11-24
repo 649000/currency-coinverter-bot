@@ -59,7 +59,7 @@ public class ToCurrencyCommand implements Command {
                 String body = "Oops, it looks like you've entered an invalid currency code or country! 😕\n\n" +
                         "Please use a valid currency code (e.g., `SGD`, `MYR`, `JPY`) or a full country name (e.g., `Singapore`, `Malaysia`, `Japan`).\n\n" +
                         "*Example:*\n" +
-                        "`/to SGD` or `/to Singapore`.\n\n" +
+                        "`/to SG`, `/to SGD` or `/to Singapore`.\n\n" +
                         "Alternatively, choose one of the common currencies below:";
 
 

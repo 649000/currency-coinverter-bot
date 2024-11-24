@@ -41,16 +41,17 @@ public class HelpCommand implements Command {
 
                 "➖*/start* - Get an introduction and instructions on how to use the bot.\n"+
                 "➖*/from <currency code or country name>* – Set your input currency.\n"+
-                "   Example: `/from MYR` or `/from Malaysia`\n"+
+                "   Example: `/from MY`, `/from MYR` or `/from Malaysia`\n"+
                 "➖*/to <currency code or country name>* – Set your output currency.\n"+
-                "   Example: `/to SGD` or `/to Singapore`\n"+
+                "   Example: `/to SG`, `/to SGD` or `/to Singapore`\n"+
                 "➖*/getcurrencies* – View your selected input and output currency.\n"+
                 "➖*/deletecurrency* – Delete your output currency.\n\n"+
 
                 "⚡️ *Additional Features:*\n\n"+
 
                 "➖*Location-based currency setting:* Send your location 🌍 to automatically detect your input currency based on where you are.\n" +
-                "➖*Currency codes & country names:* You can use either currency codes (e.g., SGD, MYR) or country names (e.g., Singapore, Malaysia) to set the currencies.\n\n" +
+                "➖*Currency codes & country names:* You can use either currency codes (e.g., SGD, MYR) or country names (e.g., Singapore, Malaysia) to set the currencies.\n" +
+                "   Currency codes and country names are case insensitive.\n\n" +
 
                 "Once you've set the input and output currencies, simply type the amount you'd like to convert, and I'll handle the rest 💡.\n\n" +
 

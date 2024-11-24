@@ -101,7 +101,7 @@ public class Util {
     /**
      * Formats a given number as a nicely formatted money string.
      *
-     * @param amount   The monetary value to format.
+     * @param amount       The monetary value to format.
      * @param currencyCode The ISO 4217 currency code (e.g., "SGD", "USD").
      * @return A formatted money string.
      * @throws IllegalArgumentException if currency code is invalid
