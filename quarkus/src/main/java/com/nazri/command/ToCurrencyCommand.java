@@ -79,7 +79,7 @@ public class ToCurrencyCommand implements Command {
                     userService.update(user);
 
                     StringBuilder builder = new StringBuilder();
-                    builder.append("Your output currency has been saved: ").append(Util.getFlagFromCurrencyCode(currencyCode)).append(" *").append(currencyCode).append("*.\n");
+                    builder.append("Your output currency has been saved:\n").append(Util.getFlagFromCurrencyCode(currencyCode)).append(" *").append(currencyCode).append("*.\n");
                     builder.append("You can now use this currency for conversions!\n\n");
                     builder.append("Your Output Currencies:\n");
                     for (int i = 0; i < user.getOutputCurrency().size(); i++) {

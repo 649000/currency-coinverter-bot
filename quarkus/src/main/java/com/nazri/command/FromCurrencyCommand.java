@@ -69,7 +69,7 @@ public class FromCurrencyCommand implements Command {
                 user.setInputCurrency(currencyCode);
                 userService.update(user);
                 response.setText(
-                        "Your input currency has been saved: "+ Util.getFlagFromCurrencyCode(currencyCode) +" *" + currencyCode + "*. \n" +
+                        "Your input currency has been saved:\n"+ Util.getFlagFromCurrencyCode(currencyCode) +" *" + currencyCode + "*. \n" +
                                 "You can now use this currency for conversions!");
             }
 
