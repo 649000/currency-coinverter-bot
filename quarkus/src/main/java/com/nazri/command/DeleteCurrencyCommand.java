@@ -4,6 +4,7 @@ import com.nazri.model.User;
 import com.nazri.service.TelegramBot;
 import com.nazri.service.UserService;
 import com.nazri.util.Constant;
+import com.nazri.util.Util;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
@@ -68,7 +69,7 @@ public class DeleteCurrencyCommand implements Command {
 
                 for (String currencyCode : user.getOutputCurrency()) {
                     InlineKeyboardButton button1 = new InlineKeyboardButton();
-                    button1.setText(currencyCode);
+                    button1.setText(Util.getFlagFromCurrencyCode(currencyCode) +" "+currencyCode);
                     button1.setCallbackData(getName() + ":" + currencyCode);
                     rowInline.add(button1);
                 }
@@ -97,7 +98,7 @@ public class DeleteCurrencyCommand implements Command {
             SendMessage response = new SendMessage();
             response.setChatId(String.valueOf(callbackQuery.getMessage().getChatId()));
             response.setParseMode(Constant.MARKDOWN);
-            response.setText("The currency *" + data + "* has been deleted ✅.");
+            response.setText("The currency "+ Util.getFlagFromCurrencyCode(data) +"*" + data + "* has been deleted ✅.");
 
             User user = userService.findOne(callbackQuery.getMessage().getChatId());
             if(user.getOutputCurrency().remove(data)) {

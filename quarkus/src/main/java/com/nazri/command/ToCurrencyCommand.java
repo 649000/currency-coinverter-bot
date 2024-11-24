@@ -77,11 +77,16 @@ public class ToCurrencyCommand implements Command {
                 } else {
                     user.getOutputCurrency().add(currencyCode);
                     userService.update(user);
-                    response.setText(
-                            "Your new output currency has been saved: *" + currencyCode + "*. \n" +
-                                    "You can now use this currency for conversions! \n\n" +
-                                    "Output Currencies: *" + String.join(", ", user.getOutputCurrency()) + "*"
-                    );
+
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("Your output currency has been saved: ").append(Util.getFlagFromCurrencyCode(currencyCode)).append(" *").append(currencyCode).append("*.\n");
+                    builder.append("You can now use this currency for conversions!\n\n");
+                    builder.append("Your Output Currencies:\n");
+                    for (int i = 0; i < user.getOutputCurrency().size(); i++) {
+                        builder.append(i + 1).append(". ").append(Util.getFlagFromCurrencyCode(user.getOutputCurrency().get(i))).append(" ").append(user.getOutputCurrency().get(i)).append(" \n");
+                    }
+
+                    response.setText(builder.toString());
                 }
             }
             telegramBot.execute(response);

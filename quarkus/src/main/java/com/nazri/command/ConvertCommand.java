@@ -74,12 +74,15 @@ public class ConvertCommand implements Command {
 
             StringBuilder sb = new StringBuilder();
             sb.append("💵*Coinverted Currencies* 💵\n\n");
+
             sb.append("*From*\n");
-            sb.append(Util.formatMoney(inputAmount, user.getInputCurrency())).append("\n\n");
+            sb.append(Util.getFlagFromCurrencyCode(user.getInputCurrency())).append(" ").append(Util.formatMoney(inputAmount, user.getInputCurrency())).append("\n\n");
+
             sb.append("*To*\n");
             for (String currencyCode : user.getOutputCurrency()) {
                 if (result.containsKey(currencyCode)) {
-                    sb.append(Util.formatMoney(
+                    sb.append(Util.getFlagFromCurrencyCode(currencyCode))
+                            .append(Util.formatMoney(
                                     result.get(currencyCode),
                                     currencyCode
                             ))

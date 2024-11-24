@@ -5,6 +5,7 @@ import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.Locale;
@@ -33,49 +34,91 @@ public class Util {
         }
     }
 
-    public static String getFlagEmoji(String countryCode) {
-        if (countryCode == null || countryCode.length() != 2) {
-            throw new IllegalArgumentException("Country code must be a 2-letter string.");
+//    public static String getFlagEmoji(String countryCode) {
+//        if (countryCode == null || countryCode.length() != 2) {
+//            throw new IllegalArgumentException("Country code must be a 2-letter string.");
+//        }
+//
+//        // Convert to uppercase to handle lowercase inputs
+//        countryCode = countryCode.toUpperCase();
+//
+//        // Calculate the regional indicator symbols
+//        int firstChar = countryCode.charAt(0) - 'A' + 0x1F1E6;
+//        int secondChar = countryCode.charAt(1) - 'A' + 0x1F1E6;
+//
+//        // Combine them into a string
+//        return new String(Character.toChars(firstChar)) + new String(Character.toChars(secondChar));
+//    }
+//
+//    public static String getCountryCodeFromCurrency(String currencyCode) {
+//        // Validate input
+//        if (currencyCode == null || currencyCode.length() != 3) {
+//            throw new IllegalArgumentException("Invalid currency code. Must be a 3-letter ISO 4217 code.");
+//        }
+//
+//        // Loop through all available locales to find the matching country
+//        for (Locale locale : Locale.getAvailableLocales()) {
+//            try {
+//                // Get the currency for this locale
+//                Currency currency = Currency.getInstance(locale);
+//
+//                if (currency != null && currency.getCurrencyCode().equalsIgnoreCase(currencyCode)) {
+//                    // Return the country code (ISO 3166-1 alpha-2)
+//                    return locale.getCountry();
+//                }
+//            } catch (Exception ignored) {
+//                // Some locales might not have a currency
+//            }
+//        }
+//
+//        return null;
+//    }
+//
+//    public static String getFlagFromCurrencyCode(final String currencyCode) {
+//        final String countryCode = getCountryCodeFromCurrency(currencyCode);
+//        return getFlagEmoji(countryCode);
+//    }
+
+    /**
+     * Converts a currency code to its corresponding flag emoji.
+     *
+     * @param currencyCode ISO 4217 currency code (e.g., "USD", "EUR", "GBP")
+     * @return The flag emoji for the currency's primary country
+     * @throws IllegalArgumentException if currency code is invalid
+     */
+    public static String getFlagFromCurrencyCode(final String currencyCode) {
+        if (currencyCode == null || currencyCode.length() != 3) {
+            throw new IllegalArgumentException("Currency code must be a 3-letter ISO 4217 code");
         }
 
-        // Convert to uppercase to handle lowercase inputs
-        countryCode = countryCode.toUpperCase();
+        if(currencyCode.equalsIgnoreCase("USD")) {
+            return "\uD83C\uDDFA\uD83C\uDDF8";
+        } else if(currencyCode.equalsIgnoreCase("EUR")) {
+            return "\uD83C\uDDEA\uD83C\uDDFA";
+        }
 
-        // Calculate the regional indicator symbols
+        // Find the first locale that uses this currency
+        String countryCode = Arrays.stream(Locale.getAvailableLocales()).filter(
+                        locale -> {
+                            try {
+                                Currency currency = Currency.getInstance(locale);
+                                return currency != null &&
+                                        currency.getCurrencyCode().equalsIgnoreCase(currencyCode);
+                            } catch (Exception e) {
+                                return false;
+                            }
+                        }
+                ).map(Locale::getCountry)
+                .filter(country -> !country.isEmpty())
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No country found for currency: " + currencyCode));
+
+        // Convert country code to flag emoji
         int firstChar = countryCode.charAt(0) - 'A' + 0x1F1E6;
         int secondChar = countryCode.charAt(1) - 'A' + 0x1F1E6;
 
-        // Combine them into a string
-        return new String(Character.toChars(firstChar)) + new String(Character.toChars(secondChar));
-    }
-
-    public static String getCountryCodeFromCurrency(String currencyCode) {
-        // Validate input
-        if (currencyCode == null || currencyCode.length() != 3) {
-            throw new IllegalArgumentException("Invalid currency code. Must be a 3-letter ISO 4217 code.");
-        }
-
-        // Loop through all available locales to find the matching country
-        for (Locale locale : Locale.getAvailableLocales()) {
-            try {
-                // Get the currency for this locale
-                Currency currency = Currency.getInstance(locale);
-
-                if (currency != null && currency.getCurrencyCode().equalsIgnoreCase(currencyCode)) {
-                    // Return the country code (ISO 3166-1 alpha-2)
-                    return locale.getCountry();
-                }
-            } catch (Exception ignored) {
-                // Some locales might not have a currency
-            }
-        }
-
-        return null;
-    }
-
-    public static String getFlagFromCurrencyCode(final String currencyCode) {
-        final String countryCode = getCountryCodeFromCurrency(currencyCode);
-        return getFlagEmoji(countryCode);
+        return new String(Character.toChars(firstChar)) +
+                new String(Character.toChars(secondChar));
     }
 
     public static HashMap<String, String> topInputCurrencies() {
