@@ -51,7 +51,7 @@ public class HelpCommand implements Command {
 
                 "➖*Location-based currency setting:* Send your location 🌍 to automatically detect your input currency based on where you are.\n" +
                 "➖*Currency codes & country names:* You can use either currency codes (e.g., SGD, MYR) or country names (e.g., Singapore, Malaysia) to set the currencies.\n" +
-                "   Currency codes and country names are case insensitive.\n\n" +
+                "   Currency codes and country names are case-insensitive.\n\n" +
 
                 "Once you've set the input and output currencies, simply type the amount you'd like to convert, and I'll handle the rest 💡.\n\n" +
 

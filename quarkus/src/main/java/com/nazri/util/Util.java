@@ -95,6 +95,8 @@ public class Util {
             return "\uD83C\uDDFA\uD83C\uDDF8";
         } else if(currencyCode.equalsIgnoreCase("EUR")) {
             return "\uD83C\uDDEA\uD83C\uDDFA";
+        } else if(currencyCode.equalsIgnoreCase("GBP")){
+            return "\uD83C\uDDEC\uD83C\uDDE7";
         }
 
         // Find the first locale that uses this currency
