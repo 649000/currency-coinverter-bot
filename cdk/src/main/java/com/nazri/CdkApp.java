@@ -7,7 +7,23 @@ import com.nazri.stack.LambdaStack;
 import com.nazri.util.Constant;
 import software.amazon.awscdk.App;
 
+/**
+ * Main CDK application for Currency Coinverter infrastructure.
+ * 
+ * This application creates and orchestrates three main stacks:
+ * - DynamoDB stack for data persistence
+ * - API Gateway stack for HTTP endpoints
+ * - Lambda stack for application logic
+ */
 public class CdkApp {
+    /**
+     * Main entry point for CDK application deployment.
+     * 
+     * Creates and deploys all required AWS infrastructure stacks
+     * for the Currency Coinverter Telegram bot.
+     * 
+     * @param args command line arguments (not used)
+     */
     public static void main(final String[] args) {
         App app = new App();
 
@@ -40,6 +56,12 @@ public class CdkApp {
         app.synth();
     }
 
+    /**
+     * Creates environment-specific stack configuration.
+     * 
+     * @param environment the target environment (dev, sit, uat)
+     * @return configured StackConfig for the specified environment
+     */
     public static StackConfig getStackConfig(String environment) {
         StackConfig stackConfig;
         switch (environment) {

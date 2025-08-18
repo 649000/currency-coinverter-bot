@@ -21,10 +21,27 @@ import software.constructs.Construct;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Lambda stack for Currency Coinverter application.
+ * 
+ * Creates a Lambda function running the Quarkus application that handles
+ * Telegram bot logic and currency conversion. Supports both native
+ * (GraalVM) and JVM runtime configurations.
+ */
 public class LambdaStack extends Stack {
     private final Function restAPIFunction;
     private final StackConfig stackConfig;
 
+    /**
+     * Constructs a new Lambda stack.
+     * 
+     * @param scope the parent construct
+     * @param id the stack identifier
+     * @param props stack properties
+     * @param stackConfig environment-specific configuration
+     * @param table DynamoDB table for data access
+     * @param httpApi HTTP API Gateway for routing
+     */
     public LambdaStack(final Construct scope, final String id, final StackProps props, StackConfig stackConfig, Table table, HttpApi httpApi) {
         super(scope, id, props);
         this.stackConfig = stackConfig;
@@ -41,9 +58,12 @@ public class LambdaStack extends Stack {
     }
 
     /**
-     * Deploying native images compiled by GraalVM
+     * Creates a Lambda function using GraalVM native image.
+     * 
+     * Native images provide faster cold start times but require
+     * compilation with GraalVM native-image tool.
      *
-     * @return
+     * @return configured Lambda function for native runtime
      */
     private Function createNativeFunction() {
         return Function.Builder.create(this, "currencycoinverter-quarkus")
@@ -66,6 +86,14 @@ public class LambdaStack extends Stack {
                 .build();
     }
 
+    /**
+     * Creates a Lambda function using standard JVM runtime.
+     * 
+     * Uses Java 21 runtime with optimized JVM settings for
+     * Lambda cold start performance.
+     *
+     * @return configured Lambda function for JVM runtime
+     */
     private Function createNonNativeFunction() {
         return Function.Builder.create(this, "currencycoinverter-quarkus")
                 .description("Currency Coinverter: REST API via AWS HTTP API Gateway")
@@ -87,6 +115,11 @@ public class LambdaStack extends Stack {
                 .build();
     }
 
+    /**
+     * Configures the Telegram webhook route in the API Gateway.
+     * 
+     * @param httpApi the HTTP API Gateway to configure
+     */
     private void addTelegramWebhookRoute(HttpApi httpApi) {
         httpApi.addRoutes(AddRoutesOptions.builder()
                 .authorizer(new HttpNoneAuthorizer())
