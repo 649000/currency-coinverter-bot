@@ -39,10 +39,6 @@ public class DynamoDBStack extends Stack {
                 .writeCapacity(1)
                 .tableClass(TableClass.STANDARD)
                 .build();
-
-
-//        Tags.of(userTable).add(Constant.ENVIRONMENT, stackConfig.getTags().get(Constant.ENVIRONMENT));
-//        Tags.of(userTable).add(Constant.PROJECT, Constant.CURRENCYCOINVERTER);
     }
 
     public Table getUserTable() {
