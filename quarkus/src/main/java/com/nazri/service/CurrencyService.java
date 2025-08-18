@@ -164,10 +164,6 @@ public class CurrencyService {
         return null;
     }
 
-//    public HashMap<String, String> getAllCurrencies() {
-//
-//    }
-
     public void fetchCurrencies() throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(currencyListapiUrl))

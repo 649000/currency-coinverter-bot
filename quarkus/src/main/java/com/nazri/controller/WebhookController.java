@@ -42,19 +42,6 @@ public class WebhookController {
     @GET
     @Path("/health")
     public String healthCheck() {
-//        Set<String> toCurrencies = new HashSet<>();
-//        toCurrencies.add("MYR");
-//        toCurrencies.add("IDR");
-//        return currencyService.convertCurrency(BigDecimal.valueOf(1.0), "SGD", toCurrencies).toString();
-//        log.info(currencyService.getCurrencyCode("SGD"));
-//        log.info(currencyService.getCurrencyCode("sgd"));
-//        log.info(currencyService.getCurrencyCode("sg"));
-//        log.info(currencyService.getCurrencyCode("SG"));
-//        log.info(currencyService.getCurrencyCode("sG"));
-//        log.info(currencyService.getCurrencyCode("singapore"));
-//        log.info(currencyService.getCurrencyCode("Singapore"));
-//        log.info(currencyService.getCurrencyCode("SinGaPoRe"));
-//        log.info(currencyService.getCurrencyCode("SinGaPoRee"));
         try {
             currencyService.fetchCurrencies();
         } catch (IOException e) {
@@ -62,7 +49,6 @@ public class WebhookController {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        ;
         return "";
     }
 
