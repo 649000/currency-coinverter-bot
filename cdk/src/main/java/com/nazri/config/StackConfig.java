@@ -45,32 +45,7 @@ public class StackConfig {
                 case Constant.DEV -> {
                     logger.info("DEV StackConfig");
                     // TODO: Retrieve Account and Region from cdk.json
-                    // App app = new App();
-                    // String environment =  (String) app.getNode().tryGetContext("env");
-                    // String account = (String) app.getNode().tryGetContext("env");
                     tags.put(Constant.ENVIRONMENT, Constant.DEV);
-                    stackProps.env(Environment.builder()
-                                    .region("ap-southeast-1")
-                                    .build()
-                            )
-                            .tags(tags);
-                    graalvm = false;
-                }
-                case Constant.SIT -> {
-                    logger.info("SIT StackConfig");
-                    tags.put(Constant.ENVIRONMENT, Constant.SIT);
-                    // TODO: Values To Be Determined
-                    stackProps.env(Environment.builder()
-                                    .region("ap-southeast-1")
-                                    .build()
-                            )
-                            .tags(tags);
-                    graalvm = false;
-                }
-                case Constant.UAT -> {
-                    logger.info("UAT StackConfig");
-                    tags.put(Constant.ENVIRONMENT, Constant.UAT);
-                    // TODO: Values To Be Determined
                     stackProps.env(Environment.builder()
                                     .region("ap-southeast-1")
                                     .build()
