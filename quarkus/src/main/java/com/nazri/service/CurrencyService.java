@@ -52,26 +52,26 @@ public class CurrencyService {
     private void validateInputs(BigDecimal amount, String fromCurrency, List<String> toCurrencies) {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             log.warnf("Invalid amount: " + amount);
-//            throw new WebApplicationException(
-//                    "Amount must be positive",
-//                    Response.Status.BAD_REQUEST
-//            );
+            throw new WebApplicationException(
+                    "Amount must be positive",
+                    Response.Status.BAD_REQUEST
+            );
         }
 
         if (fromCurrency == null || fromCurrency.trim().isEmpty()) {
             log.warnf("Empty source currency");
-//            throw new WebApplicationException(
-//                    "Source currency required",
-//                    Response.Status.BAD_REQUEST
-//            );
+            throw new WebApplicationException(
+                    "Source currency required",
+                    Response.Status.BAD_REQUEST
+            );
         }
 
         if (toCurrencies == null || toCurrencies.isEmpty()) {
             log.warnf("No target currencies");
-//            throw new WebApplicationException(
-//                    "Target currencies required",
-//                    Response.Status.BAD_REQUEST
-//            );
+            throw new WebApplicationException(
+                    "Target currencies required",
+                    Response.Status.BAD_REQUEST
+            );
         }
     }
 
