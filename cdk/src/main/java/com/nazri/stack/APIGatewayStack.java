@@ -18,11 +18,10 @@ public class APIGatewayStack extends Stack {
     private final StackConfig stackConfig;
     private final HttpApi httpApi;
 
-    public APIGatewayStack(final Construct scope, final String id, final StackProps props, StackConfig stackConfig, Function function) {
+    public APIGatewayStack(final Construct scope, final String id, final StackProps props, StackConfig stackConfig) {
         super(scope, id, props);
         this.stackConfig = stackConfig;
         this.httpApi = createHTTPAPIGateway();
-        addTelegramWebhookRoute(function);
         TagUtil.addTags(this.httpApi, stackConfig);
     }
 
@@ -33,14 +32,7 @@ public class APIGatewayStack extends Stack {
                 .build();
     }
 
-    private void addTelegramWebhookRoute(Function function) {
-        httpApi.addRoutes(AddRoutesOptions.builder()
-                .authorizer(new HttpNoneAuthorizer())
-                .path("/api/telegram/webhook")
-                .methods(List.of(HttpMethod.POST))
-                .integration(HttpLambdaIntegration.Builder
-                        .create("currencycoinverter-telegram-webhook", function)
-                        .build())
-                .build());
+    public HttpApi getHttpApi() {
+        return httpApi;
     }
 }

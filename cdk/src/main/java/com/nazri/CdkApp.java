@@ -11,11 +11,14 @@ public class CdkApp {
     public static void main(final String[] args) {
         App app = new App();
 
-        // cdk synth --context env=dev OR --context env=sit OR --context env=uat
-//        String environment = (String) app.getNode().tryGetContext("env");
+        // Get environment from context or default to dev
+        String environment = (String) app.getNode().tryGetContext("env");
 
-           String environment = Constant.DEV;
-
+        if (environment.equalsIgnoreCase(Constant.PRD)) {
+            environment = Constant.PRD;
+        } else {
+            environment = Constant.DEV;
+        }
 
         StackConfig stackConfig = getStackConfig(environment);
 
@@ -25,20 +28,20 @@ public class CdkApp {
                 .build(),
                 stackConfig);
 
+        APIGatewayStack apiGatewayStack = new APIGatewayStack(app, "currencycoinverter-api-stack", stackConfig.getStackProps()
+                .stackName("currencycoinverter-api-stack")
+                .description("HTTP API Gateway Stack for Currency Coinverter")
+                .build(),
+                stackConfig);
+
         LambdaStack apiLambdaStack = new LambdaStack(app, "currencycoinverter-api-lambda-stack", stackConfig.getStackProps()
                 .stackName("currencycoinverter-api-lambda-stack")
                 .description("Quarkus API Stack for Currency Coinverter")
                 .build(),
                 stackConfig,
-                dynamoDBStack.getUserTable()
+                dynamoDBStack.getUserTable(),
+                apiGatewayStack.getHttpApi()
         );
-
-        new APIGatewayStack(app, "currencycoinverter-api-stack", stackConfig.getStackProps()
-                .stackName("currencycoinverter-api-stack")
-                .description("HTTP API Gateway Stack for Currency Coinverter")
-                .build(),
-                stackConfig,
-                apiLambdaStack.getAPIFunction());
 
         app.synth();
     }

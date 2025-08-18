@@ -6,19 +6,26 @@ import com.nazri.util.TagUtil;
 import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
+import software.amazon.awscdk.aws_apigatewayv2_integrations.HttpLambdaIntegration;
+import software.amazon.awscdk.services.apigatewayv2.AddRoutesOptions;
+import software.amazon.awscdk.services.apigatewayv2.HttpApi;
+import software.amazon.awscdk.services.apigatewayv2.HttpMethod;
+import software.amazon.awscdk.services.apigatewayv2.HttpNoneAuthorizer;
 import software.amazon.awscdk.services.dynamodb.Table;
+import software.amazon.awscdk.services.lambda.Architecture;
 import software.amazon.awscdk.services.lambda.Code;
 import software.amazon.awscdk.services.lambda.Function;
 import software.amazon.awscdk.services.lambda.Runtime;
 import software.constructs.Construct;
 
+import java.util.List;
 import java.util.Map;
 
 public class LambdaStack extends Stack {
     private final Function restAPIFunction;
     private final StackConfig stackConfig;
 
-    public LambdaStack(final Construct scope, final String id, final StackProps props, StackConfig stackConfig, Table table) {
+    public LambdaStack(final Construct scope, final String id, final StackProps props, StackConfig stackConfig, Table table, HttpApi httpApi) {
         super(scope, id, props);
         this.stackConfig = stackConfig;
 
@@ -28,6 +35,7 @@ public class LambdaStack extends Stack {
             this.restAPIFunction = createNonNativeFunction();
         }
 
+        addTelegramWebhookRoute(httpApi);
         table.grantReadWriteData(this.restAPIFunction);
         TagUtil.addTags(this.restAPIFunction, stackConfig);
     }
@@ -43,6 +51,8 @@ public class LambdaStack extends Stack {
                 .code(Code.fromAsset("../quarkus/target/function.zip"))
                 .timeout(Duration.seconds(15))
                 .memorySize(512)
+                // If building on M series mac
+                .architecture(Architecture.ARM_64)
                 // GraalVM specific
                 .runtime(Runtime.PROVIDED_AL2023)
                 .handler("not.used.for.native")
@@ -63,6 +73,8 @@ public class LambdaStack extends Stack {
                 .timeout(Duration.seconds(15))
                 .memorySize(512)
                 .runtime(Runtime.JAVA_21)
+                // If building on M series mac
+                .architecture(Architecture.ARM_64)
                 .handler("io.quarkus.amazon.lambda.runtime.QuarkusStreamHandler::handleRequest")
                 .environment(Map.of(
                         "quarkus_lambda_handler", "io.quarkus.amazon.lambda.runtime.QuarkusStreamHandler::handleRequest",
@@ -73,6 +85,17 @@ public class LambdaStack extends Stack {
                         "JAVA_TOOL_OPTIONS", "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
                 ))
                 .build();
+    }
+
+    private void addTelegramWebhookRoute(HttpApi httpApi) {
+        httpApi.addRoutes(AddRoutesOptions.builder()
+                .authorizer(new HttpNoneAuthorizer())
+                .path("/api/telegram/webhook")
+                .methods(List.of(HttpMethod.POST))
+                .integration(HttpLambdaIntegration.Builder
+                        .create("currencycoinverter-telegram-webhook", restAPIFunction)
+                        .build())
+                .build());
     }
 
     public Function getAPIFunction() {
