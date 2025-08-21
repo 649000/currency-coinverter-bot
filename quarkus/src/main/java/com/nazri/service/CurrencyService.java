@@ -12,10 +12,7 @@ import org.jboss.logging.Logger;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -30,12 +27,6 @@ public class CurrencyService {
     @RestClient
     CurrencyApiClient currencyApiClient;
 
-    // Circuit breaker state for external API resilience
-    private static final AtomicInteger failureCount = new AtomicInteger(0);
-    private static final AtomicLong lastFailureTime = new AtomicLong(0);
-    private static final int FAILURE_THRESHOLD = 5;
-    private static final Duration CIRCUIT_TIMEOUT = Duration.ofMinutes(5);
-    
     // Configuration constants
     private static final BigDecimal MAX_AMOUNT = new BigDecimal("1000000");
     private static final int MAX_TARGET_CURRENCIES = 10;
@@ -53,26 +44,13 @@ public class CurrencyService {
     public Map<String, BigDecimal> convertCurrency(BigDecimal amount, String fromCurrency, List<String> toCurrencies) {
         validateInputs(amount, fromCurrency, toCurrencies);
         
-        // Check circuit breaker before attempting external calls
-        if (isCircuitOpen()) {
-            log.warn("Circuit breaker is open, rejecting request");
-            throw new WebApplicationException(
-                "Currency service temporarily unavailable", 
-                Response.Status.SERVICE_UNAVAILABLE
-            );
-        }
-
         try {
             Map<String, BigDecimal> exchangeRates = fetchExchangeRates(fromCurrency, toCurrencies);
-            Map<String, BigDecimal> result = performConversions(amount, exchangeRates);
-            recordSuccess();
-            return result;
+            return performConversions(amount, exchangeRates);
         } catch (WebApplicationException e) {
-            recordFailure();
             // Re-throw WebApplicationException as-is to preserve status codes
             throw e;
         } catch (Exception e) {
-            recordFailure();
             log.errorf("Currency conversion failed: %s", e.getMessage());
             throw new WebApplicationException(
                 "Currency conversion failed", 
@@ -262,47 +240,6 @@ public class CurrencyService {
 
         return null;
     }
-
-    // ==================== Circuit Breaker Implementation ====================
-    
-    /**
-     * Checks if circuit breaker is open based on failure count and timeout.
-     */
-    private boolean isCircuitOpen() {
-        if (failureCount.get() < FAILURE_THRESHOLD) {
-            return false;
-        }
-        
-        long timeSinceLastFailure = System.currentTimeMillis() - lastFailureTime.get();
-        if (timeSinceLastFailure > CIRCUIT_TIMEOUT.toMillis()) {
-            // Reset circuit breaker after timeout
-            log.info("Circuit breaker timeout expired, resetting");
-            failureCount.set(0);
-            return false;
-        }
-        
-        return true;
-    }
-    
-    /**
-     * Records a failure for circuit breaker tracking.
-     */
-    private void recordFailure() {
-        int failures = failureCount.incrementAndGet();
-        lastFailureTime.set(System.currentTimeMillis());
-        log.warnf("Recorded failure #%d", failures);
-    }
-    
-    /**
-     * Records a success and resets circuit breaker if needed.
-     */
-    private void recordSuccess() {
-        if (failureCount.get() > 0) {
-            log.info("Service recovered, resetting circuit breaker");
-            failureCount.set(0);
-        }
-    }
-
 
     // TODO: Future enhancement - implement currency list fetching
     // public void fetchCurrencies() throws IOException, InterruptedException { ... }
