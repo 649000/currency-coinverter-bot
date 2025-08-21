@@ -1,5 +1,7 @@
 package com.nazri.util;
 
+import org.eclipse.microprofile.config.ConfigProvider;
+
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.Instant;
@@ -32,70 +34,6 @@ public class Util {
         } catch (NumberFormatException e) {
             return false;
         }
-    }
-
-    /**
-     * Converts a currency code to its corresponding flag emoji.
-     *
-     * @param currencyCode ISO 4217 currency code (e.g., "USD", "EUR", "GBP")
-     * @return The flag emoji for the currency's primary country
-     * @throws IllegalArgumentException if currency code is invalid
-     */
-    public static String getFlagFromCurrencyCode(final String currencyCode) {
-        if (currencyCode == null || currencyCode.length() != 3) {
-            throw new IllegalArgumentException("Currency code must be a 3-letter ISO 4217 code");
-        }
-
-        if(currencyCode.equalsIgnoreCase("USD")) {
-            return "\uD83C\uDDFA\uD83C\uDDF8";
-        } else if(currencyCode.equalsIgnoreCase("EUR")) {
-            return "\uD83C\uDDEA\uD83C\uDDFA";
-        } else if(currencyCode.equalsIgnoreCase("GBP")){
-            return "\uD83C\uDDEC\uD83C\uDDE7";
-        }
-
-        // Find the first locale that uses this currency
-        String countryCode = Arrays.stream(Locale.getAvailableLocales()).filter(
-                        locale -> {
-                            try {
-                                Currency currency = Currency.getInstance(locale);
-                                return currency != null &&
-                                        currency.getCurrencyCode().equalsIgnoreCase(currencyCode);
-                            } catch (Exception e) {
-                                return false;
-                            }
-                        }
-                ).map(Locale::getCountry)
-                .filter(country -> !country.isEmpty())
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("No country found for currency: " + currencyCode));
-
-        // Convert country code to flag emoji
-        int firstChar = countryCode.charAt(0) - 'A' + 0x1F1E6;
-        int secondChar = countryCode.charAt(1) - 'A' + 0x1F1E6;
-
-        return new String(Character.toChars(firstChar)) +
-                new String(Character.toChars(secondChar));
-    }
-
-    public static HashMap<String, String> topInputCurrencies() {
-        HashMap<String, String> hashMap = new HashMap<>();
-        hashMap.put("THB", "🇹🇭");
-        hashMap.put("MYR", "🇲🇾");
-        hashMap.put("JPY", "🇯🇵");
-        hashMap.put("IDR", "🇮🇩");
-        hashMap.put("KRW", "🇰🇷");
-        return hashMap;
-    }
-
-    public static HashMap<String, String> topOutputCurrencies() {
-        HashMap<String, String> hashMap = new HashMap<>();
-        hashMap.put("SGD", "🇸🇬");
-        hashMap.put("USD", "🇺🇸");
-        hashMap.put("JPY", "🇯🇵");
-        hashMap.put("EUR", "🇪🇺");
-        hashMap.put("GBP", "🇬🇧");
-        return hashMap;
     }
 
     /**
@@ -156,5 +94,12 @@ public class Util {
 
         // Fallback to US locale if no matching locale found
         return Locale.US;
+    }
+
+    public static String getEmojiFlag(String currencyCode) {
+        String propertyName = "currency." + currencyCode.toLowerCase();
+        return ConfigProvider.getConfig()
+                .getOptionalValue(propertyName, String.class)
+                .orElse("💰");
     }
 }
