@@ -2,16 +2,16 @@ package com.nazri.command;
 
 import com.nazri.model.User;
 import com.nazri.service.CurrencyService;
+import com.nazri.service.MessageService;
 import com.nazri.service.TelegramBot;
+import com.nazri.service.TelegramResponse;
 import com.nazri.service.UserService;
-import com.nazri.util.Constant;
 import com.nazri.util.Util;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -36,6 +36,9 @@ public class FromCurrencyCommand implements Command {
     @Inject
     CurrencyService currencyService;
 
+    @Inject
+    MessageService messageService;
+
     @ConfigProperty(name = "top.input.currencies")
     List<String> inputCurrencies;
 
@@ -52,32 +55,24 @@ public class FromCurrencyCommand implements Command {
      */
     @Override
     public void execute(Message message, String args) {
-        SendMessage response = new SendMessage();
-        response.setChatId(String.valueOf(message.getChatId()));
-        response.setParseMode(Constant.MARKDOWN);
-
         String currencyCode = currencyService.getCurrencyCode(args);
+        
         try {
+            TelegramResponse response;
+            
             if (currencyCode == null) {
-                String body = "Oops, it looks like you've entered an invalid currency code or country! 😕\n\n" +
-                        "Please use a valid currency code (e.g., `SGD`, `MYR`, `JPY`) or a full country name (e.g., `Singapore`, `Malaysia`, `Japan`). \n\n" +
-                        "*Example:*\n" +
-                        "`/from MY`, `/from MYR` or `/from Malaysia`.\n\n" +
-                        "Alternatively, send your location 🌍 to automatically set your input currency based on where you are.\n\n" +
-                        "Or choose one of the common currencies below:";
-
-                response.setText(body);
-                response.setReplyMarkup(setInlineKeyboard());
+                response = messageService.createResponse("from.currency.invalid")
+                        .keyboard(createCurrencyKeyboard());
             } else {
                 User user = userService.findOne(message.getChatId());
                 user.setInputCurrency(currencyCode);
                 userService.update(user);
-                response.setText(
-                        "Your input currency has been saved:\n"+ Util.getEmojiFlag(currencyCode) +" *" + currencyCode + "*. \n" +
-                                "You can now use this currency for conversions!");
+                
+                response = messageService.createResponse("from.currency.set", 
+                        Util.getEmojiFlag(currencyCode), currencyCode);
             }
 
-            telegramBot.execute(response);
+            telegramBot.execute(response.toMessage(message.getChatId()));
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
             throw new RuntimeException(e);
@@ -101,7 +96,7 @@ public class FromCurrencyCommand implements Command {
         }
     }
 
-    private InlineKeyboardMarkup setInlineKeyboard() {
+    private InlineKeyboardMarkup createCurrencyKeyboard() {
         // Create inline keyboard
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
