@@ -2,9 +2,10 @@ package com.nazri.command;
 
 import com.nazri.model.User;
 import com.nazri.service.CurrencyService;
+import com.nazri.service.MessageService;
 import com.nazri.service.TelegramBot;
+import com.nazri.service.TelegramResponse;
 import com.nazri.service.UserService;
-import com.nazri.util.Constant;
 import com.nazri.util.Util;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -36,6 +37,9 @@ public class ToCurrencyCommand implements Command {
     @Inject
     CurrencyService currencyService;
 
+    @Inject
+    MessageService messageService;
+
     @ConfigProperty(name = "top.output.currencies")
     List<String> outputCurrencies;
 
@@ -52,55 +56,47 @@ public class ToCurrencyCommand implements Command {
      */
     @Override
     public void execute(Message message, String args) {
-        SendMessage response = new SendMessage();
-        response.setChatId(String.valueOf(message.getChatId()));
-        response.setParseMode(Constant.MARKDOWN);
-
         String currencyCode = currencyService.getCurrencyCode(args);
+        
         try {
-
+            TelegramResponse response;
+            
             if (currencyCode == null) {
-                String body = "Oops, it looks like you've entered an invalid currency code or country! 😕\n\n" +
-                        "Please use a valid currency code (e.g., `SGD`, `MYR`, `JPY`) or a full country name (e.g., `Singapore`, `Malaysia`, `Japan`).\n\n" +
-                        "*Example:*\n" +
-                        "`/to SG`, `/to SGD` or `/to Singapore`.\n\n" +
-                        "Alternatively, choose one of the common currencies below:";
-
-
-                response.setText(body);
-                response.setReplyMarkup(setInlineKeyboard());
+                response = messageService.createResponse("to.currency.invalid")
+                        .keyboard(createCurrencyKeyboard());
             } else {
                 User user = userService.findOne(message.getChatId());
 
                 if (user.getOutputCurrency().size() >= 3) {
-                    response.setText(
-                            "Please delete your stored output currency before adding more. 🔄\n\n" +
-                                    "Use /deletecurrency to delete currencies."
-                    );
-
+                    response = messageService.createResponse("to.currency.limit");
                 } else {
                     user.getOutputCurrency().add(currencyCode);
                     userService.update(user);
 
-                    StringBuilder builder = new StringBuilder();
-                    builder.append("Your output currency has been saved:\n").append(Util.getEmojiFlag(currencyCode)).append(" *").append(currencyCode).append("*.\n");
-                    builder.append("You can now use this currency for conversions!\n\n");
-                    builder.append("Your Output Currencies:\n");
-                    for (int i = 0; i < user.getOutputCurrency().size(); i++) {
-                        builder.append(i + 1).append(". ").append(Util.getEmojiFlag(user.getOutputCurrency().get(i))).append(" ").append(user.getOutputCurrency().get(i)).append(" \n");
-                    }
-
-                    response.setText(builder.toString());
+                    String outputCurrenciesList = buildOutputCurrenciesList(user.getOutputCurrency());
+                    response = messageService.createResponse("to.currency.set", 
+                            Util.getEmojiFlag(currencyCode), currencyCode, outputCurrenciesList);
                 }
             }
-            telegramBot.execute(response);
+            
+            telegramBot.execute(response.toMessage(message.getChatId()));
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
-    private InlineKeyboardMarkup setInlineKeyboard() {
+    private String buildOutputCurrenciesList(List<String> outputCurrencies) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < outputCurrencies.size(); i++) {
+            builder.append(i + 1).append(". ")
+                   .append(Util.getEmojiFlag(outputCurrencies.get(i)))
+                   .append(" ").append(outputCurrencies.get(i)).append(" \n");
+        }
+        return builder.toString();
+    }
+
+    private InlineKeyboardMarkup createCurrencyKeyboard() {
         // Create inline keyboard
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
