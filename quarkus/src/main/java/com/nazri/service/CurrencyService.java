@@ -1,7 +1,7 @@
 package com.nazri.service;
 
 import com.nazri.client.CurrencyApiClient;
-import jakarta.annotation.PreDestroy;
+import io.quarkus.cache.CacheResult;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -13,9 +13,7 @@ import org.jboss.logging.Logger;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -32,10 +30,6 @@ public class CurrencyService {
     @RestClient
     CurrencyApiClient currencyApiClient;
 
-    // In-memory cache for exchange rates - survives across Lambda invocations in same container
-    private static final Map<String, CachedRate> RATE_CACHE = new ConcurrentHashMap<>();
-    private static final Duration CACHE_TTL = Duration.ofMinutes(15);
-    
     // Circuit breaker state for external API resilience
     private static final AtomicInteger failureCount = new AtomicInteger(0);
     private static final AtomicLong lastFailureTime = new AtomicLong(0);
@@ -45,26 +39,6 @@ public class CurrencyService {
     // Configuration constants
     private static final BigDecimal MAX_AMOUNT = new BigDecimal("1000000");
     private static final int MAX_TARGET_CURRENCIES = 10;
-    private static final int MAX_CACHE_SIZE = 100;
-    private static final int MAX_RETRIES = 3;
-    private static final long BASE_RETRY_DELAY_MS = 1000;
-
-    /**
-     * Cached exchange rate entry with timestamp for TTL management
-     */
-    private static class CachedRate {
-        final Map<String, BigDecimal> rates;
-        final Instant timestamp;
-        
-        CachedRate(Map<String, BigDecimal> rates) {
-            this.rates = new HashMap<>(rates);
-            this.timestamp = Instant.now();
-        }
-        
-        boolean isExpired() {
-            return Instant.now().isAfter(timestamp.plus(CACHE_TTL));
-        }
-    }
 
     /**
      * Converts an amount from one currency to multiple target currencies.
@@ -164,38 +138,24 @@ public class CurrencyService {
     }
 
     /**
-     * Fetches exchange rates with caching using Quarkus REST Client.
+     * Fetches exchange rates with caching using Quarkus Cache.
      * Fault tolerance (retry, circuit breaker, timeout) is handled by REST client annotations.
-     * Cache key includes sorted target currencies for optimal hit rate.
+     * Cache key is automatically generated from method parameters.
      */
+    @CacheResult(cacheName = "exchange-rates")
     private Map<String, BigDecimal> fetchExchangeRates(String fromCurrency, List<String> toCurrencies) {
+        // Sort currencies for consistent cache keys
+        List<String> sortedCurrencies = toCurrencies.stream()
+                .map(String::toUpperCase)
+                .sorted()
+                .collect(Collectors.toList());
         
-        // Create cache key with sorted currencies for better hit rate
-        String cacheKey = fromCurrency.toUpperCase() + ":" + 
-                         toCurrencies.stream()
-                                   .map(String::toUpperCase)
-                                   .sorted()
-                                   .collect(Collectors.joining(","));
-        
-        // Check cache first - significant performance boost for Lambda
-        CachedRate cached = RATE_CACHE.get(cacheKey);
-        if (cached != null && !cached.isExpired()) {
-            log.infof("Cache hit for %s", cacheKey);
-            return filterRequestedCurrencies(cached.rates, toCurrencies);
-        }
-        
-        log.infof("Cache miss for %s, fetching from API", cacheKey);
+        log.infof("Fetching exchange rates for %s -> %s", fromCurrency, sortedCurrencies);
         
         try {
             // Use REST Client - fault tolerance is handled by annotations
             Map<String, Object> response = currencyApiClient.getExchangeRates(fromCurrency.toLowerCase());
             Map<String, BigDecimal> rates = parseExchangeRates(response, fromCurrency, toCurrencies);
-            
-            // Cache the result
-            RATE_CACHE.put(cacheKey, new CachedRate(rates));
-            
-            // Periodic cache cleanup to prevent memory issues in long-running containers
-            cleanExpiredCache();
             
             return rates;
         } catch (Exception e) {
@@ -343,45 +303,6 @@ public class CurrencyService {
         }
     }
 
-    // ==================== Cache Management ====================
-    
-    /**
-     * Filters cached rates to return only requested currencies.
-     * Handles cases where cache contains more currencies than requested.
-     */
-    private Map<String, BigDecimal> filterRequestedCurrencies(Map<String, BigDecimal> allRates, List<String> requested) {
-        return requested.stream()
-                .map(String::toUpperCase)
-                .filter(allRates::containsKey)
-                .collect(Collectors.toMap(
-                    currency -> currency,
-                    allRates::get
-                ));
-    }
-    
-    /**
-     * Removes expired entries from cache to prevent memory leaks.
-     * Only runs when cache size exceeds threshold to minimize overhead.
-     */
-    private void cleanExpiredCache() {
-        if (RATE_CACHE.size() > MAX_CACHE_SIZE) {
-            int sizeBefore = RATE_CACHE.size();
-            RATE_CACHE.entrySet().removeIf(entry -> entry.getValue().isExpired());
-            int sizeAfter = RATE_CACHE.size();
-            log.infof("Cache cleanup: removed %d expired entries (%d -> %d)", 
-                     sizeBefore - sizeAfter, sizeBefore, sizeAfter);
-        }
-    }
-
-    /**
-     * Cleanup method called when application shuts down.
-     * Important for proper resource management in Lambda.
-     */
-    @PreDestroy
-    void cleanup() {
-        RATE_CACHE.clear();
-        log.info("Currency service cache cleared on shutdown");
-    }
 
     // TODO: Future enhancement - implement currency list fetching
     // public void fetchCurrencies() throws IOException, InterruptedException { ... }
