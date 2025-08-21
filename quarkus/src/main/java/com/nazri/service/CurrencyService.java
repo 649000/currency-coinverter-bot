@@ -8,7 +8,6 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
-import software.amazon.awssdk.services.dynamodb.endpoints.internal.Value;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -19,7 +18,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class CurrencyService {
