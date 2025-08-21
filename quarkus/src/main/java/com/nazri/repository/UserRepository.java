@@ -34,19 +34,22 @@ public class UserRepository {
     }
 
     public User create(User user) {
+        log.infof("Creating user with chatId: %d, username: %s", user.getChatId(), user.getTelegramUsername());
         try {
             PutItemEnhancedRequest<User> request = PutItemEnhancedRequest.builder(User.class)
                     .item(user)
                     .build();
             userDynamoDbTable.putItem(request);
+            log.infof("Successfully created user with chatId: %d", user.getChatId());
             return user;
         } catch (DynamoDbException e) {
-            log.error(e.getMessage());
+            log.errorf("Failed to create user with chatId: %d - %s", user.getChatId(), e.getMessage());
             throw new IllegalArgumentException(e.getMessage());
         }
     }
 
     public User findOne(final long chatId) {
+        log.debugf("Finding user with chatId: %d", chatId);
         try {
             Key key = Key.builder()
                     .partitionValue(chatId)
@@ -56,14 +59,21 @@ public class UserRepository {
                     .key(key)
                     .build();
 
-            return userDynamoDbTable.getItem(request);
+            User user = userDynamoDbTable.getItem(request);
+            if (user != null) {
+                log.debugf("Found user with chatId: %d", chatId);
+            } else {
+                log.infof("User not found with chatId: %d", chatId);
+            }
+            return user;
         } catch (DynamoDbException e) {
-            log.error(e.getMessage());
+            log.errorf("Error finding user with chatId: %d - %s", chatId, e.getMessage());
             throw new IllegalArgumentException(e.getMessage());
         }
     }
 
     public User update(final User user) {
+        log.infof("Updating user with chatId: %d", user.getChatId());
         try {
 
             UpdateItemEnhancedRequest<User> request = UpdateItemEnhancedRequest.builder(User.class)
@@ -71,9 +81,11 @@ public class UserRepository {
                     .ignoreNullsMode(IgnoreNullsMode.DEFAULT)
                     .build();
 
-            return userDynamoDbTable.updateItem(request);
+            User updatedUser = userDynamoDbTable.updateItem(request);
+            log.infof("Successfully updated user with chatId: %d", user.getChatId());
+            return updatedUser;
         } catch (DynamoDbException e) {
-            log.error(e.getMessage());
+            log.errorf("Failed to update user with chatId: %d - %s", user.getChatId(), e.getMessage());
             throw new IllegalArgumentException("Error updating user: " + e.getMessage());
         }
     }
