@@ -5,15 +5,17 @@ import com.nazri.service.CurrencyService;
 import com.nazri.service.TelegramBot;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 @ApplicationScoped
 @Path("/api/telegram")
@@ -43,13 +45,8 @@ public class WebhookController {
 //    @GET
 //    @Path("/health")
 //    public String healthCheck() {
-//        try {
-//            currencyService.fetchCurrencies();
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        } catch (InterruptedException e) {
-//            throw new RuntimeException(e);
-//        }
+//       Map map = currencyService.convertCurrency(BigDecimal.valueOf(10.0),"USD", List.of("SGD", "MYR"));
+//       log.info(map.toString());
 //        return "";
 //    }
 
