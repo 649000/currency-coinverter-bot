@@ -76,12 +76,12 @@ public class ConvertCommand implements Command {
             sb.append("💵*Coinverted Currencies* 💵\n\n");
 
             sb.append("*From*\n");
-            sb.append(Util.getFlagFromCurrencyCode(user.getInputCurrency())).append(" ").append(Util.formatMoney(inputAmount, user.getInputCurrency())).append("\n\n");
+            sb.append(Util.getEmojiFlag(user.getInputCurrency())).append(" ").append(Util.formatMoney(inputAmount, user.getInputCurrency())).append("\n\n");
 
             sb.append("*To*\n");
             for (String currencyCode : user.getOutputCurrency()) {
                 if (result.containsKey(currencyCode)) {
-                    sb.append(Util.getFlagFromCurrencyCode(currencyCode))
+                    sb.append(Util.getEmojiFlag(currencyCode))
                             .append(Util.formatMoney(
                                     result.get(currencyCode),
                                     currencyCode

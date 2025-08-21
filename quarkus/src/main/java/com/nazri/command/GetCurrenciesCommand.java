@@ -42,14 +42,14 @@ public class GetCurrenciesCommand implements Command {
         if (user.getInputCurrency() == null) {
             body.append("\n\n");
         } else {
-            body.append("1. ").append(Util.getFlagFromCurrencyCode(user.getInputCurrency())).append(" <b>").append(user.getInputCurrency()).append("</b>\n\n");
+            body.append("1. ").append(Util.getEmojiFlag(user.getInputCurrency())).append(" <b>").append(user.getInputCurrency()).append("</b>\n\n");
         }
 
 
         // Add output currencies
         body.append("Your Output Currencies:\n");
         for (int i = 0; i < user.getOutputCurrency().size(); i++) {
-            body.append(i + 1).append(". ").append(Util.getFlagFromCurrencyCode(user.getOutputCurrency().get(i))).append(" <b>").append(user.getOutputCurrency().get(i)).append("</b> \n");
+            body.append(i + 1).append(". ").append(Util.getEmojiFlag(user.getOutputCurrency().get(i))).append(" <b>").append(user.getOutputCurrency().get(i)).append("</b> \n");
         }
 
 

@@ -8,6 +8,7 @@ import com.nazri.util.Constant;
 import com.nazri.util.Util;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -34,6 +35,9 @@ public class FromCurrencyCommand implements Command {
 
     @Inject
     CurrencyService currencyService;
+
+    @ConfigProperty(name = "top.input.currencies")
+    List<String> inputCurrencies;
 
     @Override
     public String getName() {
@@ -69,7 +73,7 @@ public class FromCurrencyCommand implements Command {
                 user.setInputCurrency(currencyCode);
                 userService.update(user);
                 response.setText(
-                        "Your input currency has been saved:\n"+ Util.getFlagFromCurrencyCode(currencyCode) +" *" + currencyCode + "*. \n" +
+                        "Your input currency has been saved:\n"+ Util.getEmojiFlag(currencyCode) +" *" + currencyCode + "*. \n" +
                                 "You can now use this currency for conversions!");
             }
 
@@ -105,8 +109,8 @@ public class FromCurrencyCommand implements Command {
         // First row of buttons
         List<InlineKeyboardButton> rowInline = new ArrayList<>();
 
-        for (String currencyCode : Util.topInputCurrencies().keySet()) {
-            String flag = Util.topInputCurrencies().get(currencyCode);
+        for (String currencyCode : inputCurrencies) {
+            String flag = Util.getEmojiFlag(currencyCode);
             InlineKeyboardButton button = new InlineKeyboardButton();
             button.setText(flag + " " + currencyCode.toUpperCase());
             button.setCallbackData(getName() + ":" + currencyCode);

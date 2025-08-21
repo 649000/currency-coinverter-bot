@@ -8,6 +8,7 @@ import com.nazri.util.Constant;
 import com.nazri.util.Util;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -34,6 +35,9 @@ public class ToCurrencyCommand implements Command {
 
     @Inject
     CurrencyService currencyService;
+
+    @ConfigProperty(name = "top.output.currencies")
+    List<String> outputCurrencies;
 
     @Override
     public String getName() {
@@ -79,11 +83,11 @@ public class ToCurrencyCommand implements Command {
                     userService.update(user);
 
                     StringBuilder builder = new StringBuilder();
-                    builder.append("Your output currency has been saved:\n").append(Util.getFlagFromCurrencyCode(currencyCode)).append(" *").append(currencyCode).append("*.\n");
+                    builder.append("Your output currency has been saved:\n").append(Util.getEmojiFlag(currencyCode)).append(" *").append(currencyCode).append("*.\n");
                     builder.append("You can now use this currency for conversions!\n\n");
                     builder.append("Your Output Currencies:\n");
                     for (int i = 0; i < user.getOutputCurrency().size(); i++) {
-                        builder.append(i + 1).append(". ").append(Util.getFlagFromCurrencyCode(user.getOutputCurrency().get(i))).append(" ").append(user.getOutputCurrency().get(i)).append(" \n");
+                        builder.append(i + 1).append(". ").append(Util.getEmojiFlag(user.getOutputCurrency().get(i))).append(" ").append(user.getOutputCurrency().get(i)).append(" \n");
                     }
 
                     response.setText(builder.toString());
@@ -104,8 +108,8 @@ public class ToCurrencyCommand implements Command {
         // First row of buttons
         List<InlineKeyboardButton> rowInline = new ArrayList<>();
 
-        for (String currencyCode : Util.topOutputCurrencies().keySet()) {
-            String flag = Util.topOutputCurrencies().get(currencyCode);
+        for (String currencyCode : outputCurrencies) {
+            String flag = Util.getEmojiFlag(currencyCode);
             InlineKeyboardButton button = new InlineKeyboardButton();
             button.setText(flag + " " + currencyCode.toUpperCase());
             button.setCallbackData(getName() + ":" + currencyCode);
