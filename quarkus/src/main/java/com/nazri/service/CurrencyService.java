@@ -27,10 +27,6 @@ public class CurrencyService {
     @RestClient
     CurrencyApiClient currencyApiClient;
 
-    // Configuration constants
-    private static final BigDecimal MAX_AMOUNT = new BigDecimal("1000000");
-    private static final int MAX_TARGET_CURRENCIES = 10;
-
     /**
      * Converts an amount from one currency to multiple target currencies.
      * Implements caching, circuit breaker, and retry logic for Lambda optimization.
@@ -71,14 +67,7 @@ public class CurrencyService {
                     Response.Status.BAD_REQUEST
             );
         }
-        
-        if (amount.compareTo(MAX_AMOUNT) > 0) {
-            log.warnf("Amount too large: %s", amount);
-            throw new WebApplicationException(
-                    "Amount too large (max 1,000,000)",
-                    Response.Status.BAD_REQUEST
-            );
-        }
+
 
         if (fromCurrency == null || fromCurrency.trim().isEmpty()) {
             log.warn("Empty source currency");
@@ -95,14 +84,7 @@ public class CurrencyService {
                     Response.Status.BAD_REQUEST
             );
         }
-        
-        if (toCurrencies.size() > MAX_TARGET_CURRENCIES) {
-            log.warnf("Too many target currencies: %d", toCurrencies.size());
-            throw new WebApplicationException(
-                    "Too many target currencies (max 10)",
-                    Response.Status.BAD_REQUEST
-            );
-        }
+
         
         // Validate source currency code
         String normalizedFrom = getCurrencyCode(fromCurrency);
@@ -121,7 +103,7 @@ public class CurrencyService {
      * Cache key is automatically generated from method parameters.
      */
     @CacheResult(cacheName = "exchange-rates")
-    private Map<String, BigDecimal> fetchExchangeRates(String fromCurrency, List<String> toCurrencies) {
+    public Map<String, BigDecimal> fetchExchangeRates(String fromCurrency, List<String> toCurrencies) {
         // Sort currencies for consistent cache keys
         List<String> sortedCurrencies = toCurrencies.stream()
                 .map(String::toUpperCase)
