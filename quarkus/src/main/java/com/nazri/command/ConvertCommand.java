@@ -191,7 +191,8 @@ public class ConvertCommand implements Command {
         for (int i = 0; i < multiplierList.size(); i++) {
             InlineKeyboardButton button = new InlineKeyboardButton();
             button.setText(multiplierSymbols.get(i));
-            BigDecimal value = new BigDecimal(inputAmount* BigDecimal.valueOf(multiplierList.get(i)));
+            BigDecimal multiplier = new BigDecimal(multiplierList.get(i));
+            BigDecimal value = inputAmount.multiply(multiplier);
             button.setCallbackData(getName() + ":" + value);
 
             rowInline.add(button);
