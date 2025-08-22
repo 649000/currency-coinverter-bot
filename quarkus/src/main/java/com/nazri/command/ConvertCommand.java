@@ -63,25 +63,20 @@ public class ConvertCommand implements Command {
             BigDecimal inputAmount = BigDecimal.valueOf(Double.parseDouble(args));
             Map<String, BigDecimal> result = currencyService.convertCurrency(inputAmount, user.getInputCurrency(), user.getOutputCurrency());
 
-            StringBuilder sb = new StringBuilder();
-            sb.append("💵*Coinverted Currencies* 💵\n\n");
+            String fromCurrency = Util.getEmojiFlag(user.getInputCurrency()) + " " + 
+                                 Util.formatMoney(inputAmount, user.getInputCurrency());
 
-            sb.append("*From*\n");
-            sb.append(Util.getEmojiFlag(user.getInputCurrency())).append(" ").append(Util.formatMoney(inputAmount, user.getInputCurrency())).append("\n\n");
-
-            sb.append("*To*\n");
+            StringBuilder toCurrencies = new StringBuilder();
             for (String currencyCode : user.getOutputCurrency()) {
                 if (result.containsKey(currencyCode)) {
-                    sb.append(Util.getEmojiFlag(currencyCode))
-                            .append(Util.formatMoney(
-                                    result.get(currencyCode),
-                                    currencyCode
-                            ))
-                            .append("\n");
+                    toCurrencies.append(Util.getEmojiFlag(currencyCode))
+                               .append(Util.formatMoney(result.get(currencyCode), currencyCode))
+                               .append("\n");
                 }
             }
-            
-            TelegramResponse response = TelegramResponse.builder().text(sb.toString());
+
+            TelegramResponse response = messageService.createResponse("convert.result", 
+                fromCurrency, toCurrencies.toString());
             telegramBot.execute(response.toMessage(message.getChatId()));
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
