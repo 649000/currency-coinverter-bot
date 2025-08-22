@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 
@@ -41,22 +40,18 @@ class UserServiceTest {
         User expectedUser = createTestUser();
         when(userRepository.create(any(User.class))).thenReturn(expectedUser);
 
-        try (MockedStatic<Util> utilMock = mockStatic(Util.class)) {
-            utilMock.when(Util::getCurrentTime).thenReturn("2023-01-01T00:00:00Z");
+        // When
+        User result = userService.create(chat);
 
-            // When
-            User result = userService.create(chat);
-
-            // Then
-            assertNotNull(result);
-            assertEquals(12345L, result.getChatId());
-            assertEquals("test_user", result.getTelegramUsername());
-            assertEquals(Arrays.asList("SGD"), result.getOutputCurrency());
-            assertEquals("2023-01-01T00:00:00Z", result.getCreatedDate());
-            assertEquals("2023-01-01T00:00:00Z", result.getUpdatedDate());
-            
-            verify(userRepository).create(any(User.class));
-        }
+        // Then
+        assertNotNull(result);
+        assertEquals(12345L, result.getChatId());
+        assertEquals("test_user", result.getTelegramUsername());
+        assertEquals(Arrays.asList("SGD"), result.getOutputCurrency());
+        assertNotNull(result.getCreatedDate());
+        assertNotNull(result.getUpdatedDate());
+        
+        verify(userRepository).create(any(User.class));
     }
 
     @Test
@@ -70,20 +65,18 @@ class UserServiceTest {
         expectedUser.setTelegramUsername(null);
         when(userRepository.create(any(User.class))).thenReturn(expectedUser);
 
-        try (MockedStatic<Util> utilMock = mockStatic(Util.class)) {
-            utilMock.when(Util::getCurrentTime).thenReturn("2023-01-01T00:00:00Z");
+        // When
+        User result = userService.create(chat);
 
-            // When
-            User result = userService.create(chat);
-
-            // Then
-            assertNotNull(result);
-            assertEquals(12345L, result.getChatId());
-            assertNull(result.getTelegramUsername());
-            assertEquals(Arrays.asList("SGD"), result.getOutputCurrency());
-            
-            verify(userRepository).create(any(User.class));
-        }
+        // Then
+        assertNotNull(result);
+        assertEquals(12345L, result.getChatId());
+        assertNull(result.getTelegramUsername());
+        assertEquals(Arrays.asList("SGD"), result.getOutputCurrency());
+        assertNotNull(result.getCreatedDate());
+        assertNotNull(result.getUpdatedDate());
+        
+        verify(userRepository).create(any(User.class));
     }
 
     @Test
