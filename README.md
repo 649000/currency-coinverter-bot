@@ -107,6 +107,6 @@ Using AWS CDK simplified infrastructure management and made deployments seamless
 4.  Expand to support other chat platforms like Slack or Discord.
 
 ## Conclusion
-Building this currency converter bot taught me a lot about serverless architecture and cloud development. The switch from Spring to Quarkus, and learning DynamoDB coming from a SQL background, were challenging but rewarding. While there's still room for improvement, I'm happy with how the project turned out - it works reliably, starts up quickly, and serves its purpose well.
+Building this currency converter bot taught me a lot about serverless architecture and cloud development. The switch from Spring to Quarkus, and learning DynamoDB coming from a SQL background, were challenging but rewarding. While there's still room for improvement, I'm happy with how the project turned out as it works reliably, starts up quickly, and serves its purpose well.
 
 Feel free to check out the code or try the bot yourself. I'm always open to feedback and suggestions!
