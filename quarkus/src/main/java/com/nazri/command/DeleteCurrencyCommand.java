@@ -48,46 +48,19 @@ public class DeleteCurrencyCommand implements Command {
      */
     @Override
     public void execute(Message message, String args) {
-        SendMessage response = new SendMessage();
-        response.setChatId(String.valueOf(message.getChatId()));
-        response.setParseMode(Constant.MARKDOWN);
         User user = userService.findOne(message.getChatId());
+
         try {
+            TelegramResponse response;
 
             if (user.getOutputCurrency().isEmpty()) {
-                response.setText("It looks like you don’t have any currencies to delete yet. 🤔\n" +
-                        "To get started, add your desired currency using the `/to` command. \n" +
-                        "_Example:_ \n" +
-                        "`/to SG`, `/to SGD` or `/to Singapore`.");
-
-                telegramBot.execute(response);
+                response = messageService.createResponse("delete.currency.none");
             } else {
-                response.setText("Which currency would you like to delete? 💭");
-
-                // Create inline keyboard
-                InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-                List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
-
-                // First row of buttons
-                List<InlineKeyboardButton> rowInline = new ArrayList<>();
-
-
-                for (String currencyCode : user.getOutputCurrency()) {
-                    InlineKeyboardButton button1 = new InlineKeyboardButton();
-                    button1.setText(Util.getEmojiFlag(currencyCode) +" "+currencyCode);
-                    button1.setCallbackData(getName() + ":" + currencyCode);
-                    rowInline.add(button1);
-                }
-
-                // Add the row to rows list
-                rowsInline.add(rowInline);
-
-                // Set the keyboard to the message
-                markupInline.setKeyboard(rowsInline);
-
-                response.setReplyMarkup(markupInline);
-                telegramBot.execute(response);
+                response = messageService.createResponse("delete.currency.select")
+                        .keyboard(createCurrencyKeyboard(user.getOutputCurrency()));
             }
+
+            telegramBot.execute(response.toMessage(message.getChatId()));
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
             throw new RuntimeException(e);
