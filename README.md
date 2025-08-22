@@ -25,6 +25,7 @@ This repository contains a Telegram Currency Conversion Bot built with a focus o
 - `/to <currency>` - Set output currency (e.g., `/to SGD`, `/to Singapore`)
 - `/help` - Show all available commands
 - `/deletecurrency` - Remove saved output currencies
+- `/getcurrencies` - Get saved input and output currencies
 
 ## Technology Stack
 
@@ -41,10 +42,10 @@ This repository contains a Telegram Currency Conversion Bot built with a focus o
 ## Project Structure
 
 ```
-├── cdk/                    # AWS CDK infrastructure code
+├── cdk/        # AWS CDK infrastructure code
 │   ├── src/main/java/
 │   └── cdk.json
-├── quarkus/               # Quarkus application
+├── quarkus/    # Quarkus application
 │   ├── src/main/java/
 │   └── pom.xml
 └── README.md
