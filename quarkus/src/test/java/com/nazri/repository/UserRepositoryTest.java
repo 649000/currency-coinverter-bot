@@ -2,11 +2,11 @@ package com.nazri.repository;
 
 import com.nazri.model.User;
 import com.nazri.util.Constant;
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
@@ -22,30 +22,57 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@QuarkusTest
+@ExtendWith(MockitoExtension.class)
 class UserRepositoryTest {
 
-    @InjectMock
-    DynamoDbEnhancedClient dynamoDbEnhancedClient;
+    @Mock
+    private DynamoDbEnhancedClient dynamoDbEnhancedClient;
 
+    @Mock
     private DynamoDbTable<User> userDynamoDbTable;
 
-    @Inject
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @BeforeEach
     void setUp() {
-        userDynamoDbTable = mock(DynamoDbTable.class);
         when(dynamoDbEnhancedClient.table(eq(Constant.USER_TABLE), any(TableSchema.class)))
                 .thenReturn(userDynamoDbTable);
+        userRepository = new UserRepository(dynamoDbEnhancedClient);
     }
 
     @Test
-    void userRepository_ShouldBeInjected() {
-        // Given & When - userRepository is injected by Quarkus
+    void constructor_ShouldInitializeSuccessfully() {
+        // Given - mocks are already set up in setUp()
+        
+        // When - constructor is called in setUp()
         
         // Then
         assertNotNull(userRepository);
+        verify(dynamoDbEnhancedClient).table(eq(Constant.USER_TABLE), any(TableSchema.class));
+    }
+
+    @Test
+    void constructor_ShouldThrowRuntimeException_WhenDynamoDbExceptionOccurs() {
+        // Given
+        when(dynamoDbEnhancedClient.table(eq(Constant.USER_TABLE), any(TableSchema.class)))
+                .thenThrow(DynamoDbException.builder().message("DynamoDB error").build());
+
+        // When & Then
+        RuntimeException exception = assertThrows(RuntimeException.class, 
+                () -> new UserRepository(dynamoDbEnhancedClient));
+        assertEquals("DynamoDB table setup failed", exception.getMessage());
+    }
+
+    @Test
+    void constructor_ShouldThrowRuntimeException_WhenUnexpectedExceptionOccurs() {
+        // Given
+        when(dynamoDbEnhancedClient.table(eq(Constant.USER_TABLE), any(TableSchema.class)))
+                .thenThrow(new RuntimeException("Unexpected error"));
+
+        // When & Then
+        RuntimeException exception = assertThrows(RuntimeException.class, 
+                () -> new UserRepository(dynamoDbEnhancedClient));
+        assertEquals("Unexpected error during DynamoDB table setup", exception.getMessage());
     }
 
     @Test
@@ -68,7 +95,7 @@ class UserRepositoryTest {
     void create_ShouldThrowIllegalArgumentException_WhenDynamoDbExceptionOccurs() {
         // Given
         User user = createTestUser();
-        DynamoDbException dynamoDbException = (DynamoDbException) DynamoDbException.builder()
+        DynamoDbException dynamoDbException = DynamoDbException.builder()
                 .message("DynamoDB create error")
                 .build();
         doThrow(dynamoDbException).when(userDynamoDbTable).putItem(any(PutItemEnhancedRequest.class));
@@ -117,7 +144,7 @@ class UserRepositoryTest {
     void findOne_ShouldThrowIllegalArgumentException_WhenDynamoDbExceptionOccurs() {
         // Given
         long chatId = 12345L;
-        DynamoDbException dynamoDbException = (DynamoDbException) DynamoDbException.builder()
+        DynamoDbException dynamoDbException = DynamoDbException.builder()
                 .message("DynamoDB find error")
                 .build();
         when(userDynamoDbTable.getItem(any(GetItemEnhancedRequest.class)))
@@ -154,7 +181,7 @@ class UserRepositoryTest {
     void update_ShouldThrowIllegalArgumentException_WhenDynamoDbExceptionOccurs() {
         // Given
         User user = createTestUser();
-        DynamoDbException dynamoDbException = (DynamoDbException) DynamoDbException.builder()
+        DynamoDbException dynamoDbException = DynamoDbException.builder()
                 .message("DynamoDB update error")
                 .build();
         when(userDynamoDbTable.updateItem(any(UpdateItemEnhancedRequest.class)))
