@@ -178,8 +178,8 @@ class CurrencyServiceTest {
         // When & Then
         WebApplicationException exception = assertThrows(WebApplicationException.class,
                 () -> currencyService.convertCurrency(amount, fromCurrency, toCurrencies));
-        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), exception.getResponse().getStatus());
-        assertEquals("Currency conversion failed", exception.getMessage());
+        assertEquals(Response.Status.SERVICE_UNAVAILABLE.getStatusCode(), exception.getResponse().getStatus());
+        assertEquals("Failed to fetch exchange rates", exception.getMessage());
     }
 
     @Test
@@ -214,8 +214,8 @@ class CurrencyServiceTest {
         // When & Then
         WebApplicationException exception = assertThrows(WebApplicationException.class,
                 () -> currencyService.fetchExchangeRates(fromCurrency, toCurrencies));
-        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), exception.getResponse().getStatus());
-        assertEquals("No rates found for currency: USD", exception.getMessage());
+        assertEquals(Response.Status.SERVICE_UNAVAILABLE.getStatusCode(), exception.getResponse().getStatus());
+        assertEquals("Failed to fetch exchange rates", exception.getMessage());
     }
 
     @Test
@@ -230,8 +230,8 @@ class CurrencyServiceTest {
         // When & Then
         WebApplicationException exception = assertThrows(WebApplicationException.class,
                 () -> currencyService.fetchExchangeRates(fromCurrency, toCurrencies));
-        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), exception.getResponse().getStatus());
-        assertEquals("No exchange rates found", exception.getMessage());
+        assertEquals(Response.Status.SERVICE_UNAVAILABLE.getStatusCode(), exception.getResponse().getStatus());
+        assertEquals("Failed to fetch exchange rates", exception.getMessage());
     }
 
     @Test

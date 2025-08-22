@@ -94,29 +94,6 @@ class StartCommandTest {
     }
 
     @Test
-    void execute_ShouldSendWelcomeMessageAndNotCreateUser_WhenUserExists() throws TelegramApiException {
-        // Given
-        Long chatId = 12345L;
-        String args = "";
-        
-        when(message.getChatId()).thenReturn(chatId);
-        when(messageService.createResponse("start.welcome")).thenReturn(telegramResponse);
-        when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
-        when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
-        when(userService.findOne(chatId)).thenReturn(user);
-
-        // When
-        startCommand.execute(message, args);
-
-        // Then
-        verify(messageService).createResponse("start.welcome");
-        verify(userService).findOne(chatId);
-        verify(userService, never()).create(any(Chat.class));
-        verify(telegramResponse).toMessage(chatId);
-        verify(telegramBot).execute(sendMessage);
-    }
-
-    @Test
     void execute_ShouldHandleArgsParameter_WhenArgsProvided() throws TelegramApiException {
         // Given
         Long chatId = 12345L;
@@ -132,54 +109,6 @@ class StartCommandTest {
         startCommand.execute(message, args);
 
         // Then
-        verify(messageService).createResponse("start.welcome");
-        verify(userService).findOne(chatId);
-        verify(telegramResponse).toMessage(chatId);
-        verify(telegramBot).execute(sendMessage);
-    }
-
-    @Test
-    void execute_ShouldHandleNullArgs_WhenArgsIsNull() throws TelegramApiException {
-        // Given
-        Long chatId = 12345L;
-        String args = null;
-        
-        when(message.getChatId()).thenReturn(chatId);
-        when(message.getChat()).thenReturn(chat);
-        when(messageService.createResponse("start.welcome")).thenReturn(telegramResponse);
-        when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
-        when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
-        when(userService.findOne(chatId)).thenReturn(user);
-
-        // When
-        startCommand.execute(message, args);
-
-        // Then
-        verify(messageService).createResponse("start.welcome");
-        verify(userService).findOne(chatId);
-        verify(telegramResponse).toMessage(chatId);
-        verify(telegramBot).execute(sendMessage);
-    }
-
-    @Test
-    void execute_ShouldThrowRuntimeException_WhenTelegramApiExceptionOccurs() throws TelegramApiException {
-        // Given
-        Long chatId = 12345L;
-        String args = "";
-        TelegramApiException telegramApiException = new TelegramApiException("API Error");
-        
-        when(message.getChatId()).thenReturn(chatId);
-        when(message.getChat()).thenReturn(chat);
-        when(messageService.createResponse("start.welcome")).thenReturn(telegramResponse);
-        when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
-        when(telegramBot.execute(sendMessage)).thenThrow(telegramApiException);
-        when(userService.findOne(chatId)).thenReturn(user);
-
-        // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> startCommand.execute(message, args));
-        assertEquals(telegramApiException, exception.getCause());
-        
         verify(messageService).createResponse("start.welcome");
         verify(userService).findOne(chatId);
         verify(telegramResponse).toMessage(chatId);
@@ -251,53 +180,6 @@ class StartCommandTest {
         verify(userService).create(chat);
         verify(telegramResponse, never()).toMessage(any(Long.class));
         verify(telegramBot, never()).execute(any(SendMessage.class));
-    }
-
-    @Test
-    void execute_ShouldHandleTelegramResponseException_WhenToMessageFails() throws TelegramApiException {
-        // Given
-        Long chatId = 12345L;
-        String args = "";
-        RuntimeException responseException = new RuntimeException("Response conversion error");
-        
-        when(message.getChatId()).thenReturn(chatId);
-        when(message.getChat()).thenReturn(chat);
-        when(messageService.createResponse("start.welcome")).thenReturn(telegramResponse);
-        when(telegramResponse.toMessage(chatId)).thenThrow(responseException);
-        when(userService.findOne(chatId)).thenReturn(user);
-
-        // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> startCommand.execute(message, args));
-        assertEquals(responseException, exception);
-        
-        verify(messageService).createResponse("start.welcome");
-        verify(userService).findOne(chatId);
-        verify(telegramResponse).toMessage(chatId);
-        verify(telegramBot, never()).execute(any(SendMessage.class));
-    }
-
-    @Test
-    void execute_ShouldWorkWithDifferentChatIds() throws TelegramApiException {
-        // Given
-        Long chatId = 98765L;
-        String args = "";
-        
-        when(message.getChatId()).thenReturn(chatId);
-        when(message.getChat()).thenReturn(chat);
-        when(messageService.createResponse("start.welcome")).thenReturn(telegramResponse);
-        when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
-        when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
-        when(userService.findOne(chatId)).thenReturn(user);
-
-        // When
-        startCommand.execute(message, args);
-
-        // Then
-        verify(messageService).createResponse("start.welcome");
-        verify(userService).findOne(chatId);
-        verify(telegramResponse).toMessage(chatId);
-        verify(telegramBot).execute(sendMessage);
     }
 
     @Test

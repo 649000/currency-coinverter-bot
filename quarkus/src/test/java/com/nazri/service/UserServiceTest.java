@@ -2,7 +2,6 @@ package com.nazri.service;
 
 import com.nazri.model.User;
 import com.nazri.repository.UserRepository;
-import com.nazri.util.Util;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
