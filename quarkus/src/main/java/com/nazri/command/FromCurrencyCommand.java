@@ -4,7 +4,7 @@ import com.nazri.model.User;
 import com.nazri.service.CurrencyService;
 import com.nazri.service.MessageService;
 import com.nazri.service.TelegramBot;
-import com.nazri.service.TelegramResponse;
+import com.nazri.model.TelegramResponse;
 import com.nazri.service.UserService;
 import com.nazri.util.Util;
 import jakarta.enterprise.context.ApplicationScoped;

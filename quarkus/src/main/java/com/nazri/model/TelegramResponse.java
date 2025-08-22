@@ -1,4 +1,4 @@
-package com.nazri.service;
+package com.nazri.model;
 
 import com.nazri.util.Constant;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;

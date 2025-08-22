@@ -4,7 +4,7 @@ import com.nazri.model.User;
 import com.nazri.service.CurrencyService;
 import com.nazri.service.MessageService;
 import com.nazri.service.TelegramBot;
-import com.nazri.service.TelegramResponse;
+import com.nazri.model.TelegramResponse;
 import com.nazri.service.UserService;
 import com.nazri.util.Util;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -12,7 +12,6 @@ import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -63,12 +62,13 @@ public class ToCurrencyCommand implements Command {
             
             if (currencyCode == null) {
                 response = messageService.createResponse("to.currency.invalid")
-                        .keyboard(createCurrencyKeyboard());
+                        .keyboard(createCurrencyKeyboard(outputCurrencies, false));
             } else {
                 User user = userService.findOne(message.getChatId());
 
                 if (user.getOutputCurrency().size() >= 3) {
-                    response = messageService.createResponse("to.currency.limit");
+                    response = messageService.createResponse("to.currency.limit")
+                            .keyboard(createCurrencyKeyboard(user.getOutputCurrency(), true));
                 } else {
                     user.getOutputCurrency().add(currencyCode);
                     userService.update(user);
@@ -96,7 +96,7 @@ public class ToCurrencyCommand implements Command {
         return builder.toString();
     }
 
-    private InlineKeyboardMarkup createCurrencyKeyboard() {
+    private InlineKeyboardMarkup createCurrencyKeyboard(List<String> currencies, boolean deleteCurrency) {
         // Create inline keyboard
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
@@ -104,11 +104,15 @@ public class ToCurrencyCommand implements Command {
         // First row of buttons
         List<InlineKeyboardButton> rowInline = new ArrayList<>();
 
-        for (String currencyCode : outputCurrencies) {
+        for (String currencyCode : currencies) {
             String flag = Util.getEmojiFlag(currencyCode);
             InlineKeyboardButton button = new InlineKeyboardButton();
             button.setText(flag + " " + currencyCode.toUpperCase());
-            button.setCallbackData(getName() + ":" + currencyCode);
+            if(deleteCurrency) {
+                button.setCallbackData("deletecurrency" + ":" + currencyCode);
+            } else {
+                button.setCallbackData(getName() + ":" + currencyCode);
+            }
             rowInline.add(button);
         }
 

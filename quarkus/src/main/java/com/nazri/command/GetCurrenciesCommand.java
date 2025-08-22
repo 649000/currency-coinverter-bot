@@ -3,15 +3,22 @@ package com.nazri.command;
 import com.nazri.model.User;
 import com.nazri.service.MessageService;
 import com.nazri.service.TelegramBot;
-import com.nazri.service.TelegramResponse;
+import com.nazri.model.TelegramResponse;
 import com.nazri.service.UserService;
 import com.nazri.util.Util;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
@@ -27,6 +34,12 @@ public class GetCurrenciesCommand implements Command {
 
     @Inject
     MessageService messageService;
+
+    @ConfigProperty(name = "top.output.currencies")
+    List<String> outputCurrencies;
+
+    @ConfigProperty(name = "top.input.currencies")
+    List<String> inputCurrencies;
 
     @Override
     public String getName() {
@@ -44,10 +57,12 @@ public class GetCurrenciesCommand implements Command {
                 response = messageService.createResponse("getcurrencies.empty");
             } else if (user.getInputCurrency() == null) {
                 String outputList = formatOutputCurrencies(user.getOutputCurrency());
-                response = messageService.createResponse("getcurrencies.no.input", outputList);
+                response = messageService.createResponse("getcurrencies.no.input", outputList)
+                        .keyboard(createCurrencyKeyboard(inputCurrencies, true));
             } else if (user.getOutputCurrency().isEmpty()) {
                 response = messageService.createResponse("getcurrencies.no.output", 
-                        Util.getEmojiFlag(user.getInputCurrency()), user.getInputCurrency());
+                        Util.getEmojiFlag(user.getInputCurrency()), user.getInputCurrency())
+                        .keyboard(createCurrencyKeyboard(outputCurrencies, false));
             } else {
                 String outputList = formatOutputCurrencies(user.getOutputCurrency());
                 response = messageService.createResponse("getcurrencies.complete", 
@@ -55,6 +70,23 @@ public class GetCurrenciesCommand implements Command {
             }
             
             telegramBot.execute(response.toMessage(message.getChatId()));
+        } catch (TelegramApiException e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void handleCallback(CallbackQuery callbackQuery, String data) {
+        AnswerCallbackQuery answerCallbackQuery = new AnswerCallbackQuery(callbackQuery.getId());
+        try {
+            telegramBot.execute(answerCallbackQuery);
+
+            Message message = new Message();
+            Chat chat = new Chat(callbackQuery.getMessage().getChatId(), "private");
+            message.setChat(chat);
+            execute(message, data);
+
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
             throw new RuntimeException(e);
@@ -72,6 +104,35 @@ public class GetCurrenciesCommand implements Command {
               .append("*\n");
         }
         return sb.toString();
+    }
+
+    private InlineKeyboardMarkup createCurrencyKeyboard(List<String> currencies, boolean inputCurrency) {
+        // Create inline keyboard
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+
+        // First row of buttons
+        List<InlineKeyboardButton> rowInline = new ArrayList<>();
+
+        for (String currencyCode : currencies) {
+            String flag = Util.getEmojiFlag(currencyCode);
+            InlineKeyboardButton button = new InlineKeyboardButton();
+            button.setText(flag + " " + currencyCode.toUpperCase());
+            if(inputCurrency) {
+                button.setCallbackData("from" + ":" + currencyCode);
+            } else {
+                button.setCallbackData("to" + ":" + currencyCode);
+            }
+            rowInline.add(button);
+        }
+
+        // Add the row to rows list
+        rowsInline.add(rowInline);
+
+        // Set the keyboard to the message
+        markupInline.setKeyboard(rowsInline);
+
+        return markupInline;
     }
 
 }

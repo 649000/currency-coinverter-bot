@@ -2,7 +2,7 @@ package com.nazri.command;
 
 import com.nazri.service.MessageService;
 import com.nazri.service.TelegramBot;
-import com.nazri.service.TelegramResponse;
+import com.nazri.model.TelegramResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.telegram.telegrambots.meta.api.objects.Message;

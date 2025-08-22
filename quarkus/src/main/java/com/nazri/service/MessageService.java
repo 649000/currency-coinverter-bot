@@ -1,5 +1,6 @@
 package com.nazri.service;
 
+import com.nazri.model.TelegramResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
