@@ -6,6 +6,7 @@ import com.nazri.service.MessageService;
 import com.nazri.service.TelegramBot;
 import com.nazri.model.TelegramResponse;
 import com.nazri.service.UserService;
+import com.nazri.util.KeyboardUtil;
 import com.nazri.util.Util;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -97,27 +98,6 @@ public class FromCurrencyCommand implements Command {
     }
 
     private InlineKeyboardMarkup createCurrencyKeyboard() {
-        // Create inline keyboard
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
-
-        // First row of buttons
-        List<InlineKeyboardButton> rowInline = new ArrayList<>();
-
-        for (String currencyCode : inputCurrencies) {
-            String flag = Util.getEmojiFlag(currencyCode);
-            InlineKeyboardButton button = new InlineKeyboardButton();
-            button.setText(flag + " " + currencyCode.toUpperCase());
-            button.setCallbackData(getName() + ":" + currencyCode);
-            rowInline.add(button);
-        }
-
-        // Add the row to rows list
-        rowsInline.add(rowInline);
-
-        // Set the keyboard to the message
-        markupInline.setKeyboard(rowsInline);
-
-        return markupInline;
+        return KeyboardUtil.createCurrencyKeyboard(inputCurrencies, getName());
     }
 }
