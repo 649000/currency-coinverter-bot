@@ -63,13 +63,13 @@ public class ToCurrencyCommand implements Command {
             
             if (currencyCode == null) {
                 response = messageService.createResponse("to.currency.invalid")
-                        .keyboard(createCurrencyKeyboard(outputCurrencies, false));
+                        .keyboard(KeyboardUtil.createCurrencyKeyboard(outputCurrencies, getName()));
             } else {
                 User user = userService.findOne(message.getChatId());
 
                 if (user.getOutputCurrency().size() >= 3) {
                     response = messageService.createResponse("to.currency.limit")
-                            .keyboard(createCurrencyKeyboard(user.getOutputCurrency(), true));
+                            .keyboard(KeyboardUtil.createCurrencyKeyboard(user.getOutputCurrency(), "deletecurrency"));
                 } else {
                     user.getOutputCurrency().add(currencyCode);
                     userService.update(user);
@@ -95,11 +95,6 @@ public class ToCurrencyCommand implements Command {
                    .append(" ").append(outputCurrencies.get(i)).append(" \n");
         }
         return builder.toString();
-    }
-
-    private InlineKeyboardMarkup createCurrencyKeyboard(List<String> currencies, boolean deleteCurrency) {
-        String commandPrefix = deleteCurrency ? "deletecurrency" : getName();
-        return KeyboardUtil.createCurrencyKeyboard(currencies, commandPrefix);
     }
 
     @Override

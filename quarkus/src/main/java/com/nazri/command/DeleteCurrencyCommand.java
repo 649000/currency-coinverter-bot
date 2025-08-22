@@ -40,8 +40,8 @@ public class DeleteCurrencyCommand implements Command {
         return "deletecurrency";
     }
 
-    @ConfigProperty(name = "top.input.currencies")
-    List<String> inputCurrencies;
+    @ConfigProperty(name = "top.output.currencies")
+    List<String> outputCurrencies;
 
     /**
      * Users to delete Output currencies
@@ -58,7 +58,7 @@ public class DeleteCurrencyCommand implements Command {
 
             if (user.getOutputCurrency().isEmpty()) {
                 response = messageService.createResponse("delete.currency.none")
-                        .keyboard(KeyboardUtil.createCurrencyKeyboard(inputCurrencies, "from"));
+                        .keyboard(KeyboardUtil.createCurrencyKeyboard(outputCurrencies, "to"));
             } else {
                 response = messageService.createResponse("delete.currency.select")
                         .keyboard(KeyboardUtil.createCurrencyKeyboard(user.getOutputCurrency(), getName()));
