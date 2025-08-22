@@ -124,7 +124,6 @@ class StartCommandTest {
         String args = "some arguments";
         
         when(message.getChatId()).thenReturn(chatId);
-        when(message.getChat()).thenReturn(chat);
         when(messageService.createResponse("start.welcome")).thenReturn(telegramResponse);
         when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
         when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
