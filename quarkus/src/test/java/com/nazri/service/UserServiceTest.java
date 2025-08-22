@@ -3,28 +3,33 @@ package com.nazri.service;
 import com.nazri.model.User;
 import com.nazri.repository.UserRepository;
 import com.nazri.util.Util;
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 
 import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@QuarkusTest
+@ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-    @Inject
-    UserService userService;
+    @Mock
+    private UserRepository userRepository;
 
-    @InjectMock
-    UserRepository userRepository;
+    private UserService userService;
+
+    @BeforeEach
+    void setUp() {
+        userService = new UserService();
+        userService.userRepository = userRepository;
+    }
 
     @Test
     void create_ShouldCreateUserWithDefaultValues_WhenChatProvided() {
