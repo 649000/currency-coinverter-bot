@@ -68,7 +68,7 @@ class UserRepositoryTest {
     void create_ShouldThrowIllegalArgumentException_WhenDynamoDbExceptionOccurs() {
         // Given
         User user = createTestUser();
-        DynamoDbException dynamoDbException = DynamoDbException.builder()
+        DynamoDbException dynamoDbException = (DynamoDbException) DynamoDbException.builder()
                 .message("DynamoDB create error")
                 .build();
         doThrow(dynamoDbException).when(userDynamoDbTable).putItem(any(PutItemEnhancedRequest.class));
@@ -117,7 +117,7 @@ class UserRepositoryTest {
     void findOne_ShouldThrowIllegalArgumentException_WhenDynamoDbExceptionOccurs() {
         // Given
         long chatId = 12345L;
-        DynamoDbException dynamoDbException = DynamoDbException.builder()
+        DynamoDbException dynamoDbException = (DynamoDbException) DynamoDbException.builder()
                 .message("DynamoDB find error")
                 .build();
         when(userDynamoDbTable.getItem(any(GetItemEnhancedRequest.class)))
@@ -154,7 +154,7 @@ class UserRepositoryTest {
     void update_ShouldThrowIllegalArgumentException_WhenDynamoDbExceptionOccurs() {
         // Given
         User user = createTestUser();
-        DynamoDbException dynamoDbException = DynamoDbException.builder()
+        DynamoDbException dynamoDbException = (DynamoDbException) DynamoDbException.builder()
                 .message("DynamoDB update error")
                 .build();
         when(userDynamoDbTable.updateItem(any(UpdateItemEnhancedRequest.class)))
