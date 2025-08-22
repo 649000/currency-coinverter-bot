@@ -28,14 +28,14 @@ class UserRepositoryTest {
     @InjectMock
     DynamoDbEnhancedClient dynamoDbEnhancedClient;
 
-    @InjectMock
-    DynamoDbTable<User> userDynamoDbTable;
+    private DynamoDbTable<User> userDynamoDbTable;
 
     @Inject
     UserRepository userRepository;
 
     @BeforeEach
     void setUp() {
+        userDynamoDbTable = mock(DynamoDbTable.class);
         when(dynamoDbEnhancedClient.table(eq(Constant.USER_TABLE), any(TableSchema.class)))
                 .thenReturn(userDynamoDbTable);
     }
