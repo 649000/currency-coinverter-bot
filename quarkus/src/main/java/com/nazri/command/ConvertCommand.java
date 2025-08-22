@@ -2,14 +2,14 @@ package com.nazri.command;
 
 import com.nazri.model.User;
 import com.nazri.service.CurrencyService;
+import com.nazri.service.MessageService;
 import com.nazri.service.TelegramBot;
+import com.nazri.service.TelegramResponse;
 import com.nazri.service.UserService;
-import com.nazri.util.Constant;
 import com.nazri.util.Util;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -30,6 +30,9 @@ public class ConvertCommand implements Command {
     @Inject
     CurrencyService currencyService;
 
+    @Inject
+    MessageService messageService;
+
     @Override
     public String getName() {
         return "convert";
@@ -37,35 +40,23 @@ public class ConvertCommand implements Command {
 
     @Override
     public void execute(Message message, String args) {
-        SendMessage response = new SendMessage();
-        response.setChatId(String.valueOf(message.getChatId()));
-        response.setParseMode(Constant.MARKDOWN);
         try {
             if (!Util.isNumeric(args)) {
-                //Input is not numeric
-                response.setText("Please enter a numeric value to convert.");
-                telegramBot.execute(response);
+                TelegramResponse response = messageService.createResponse("convert.invalid.numeric");
+                telegramBot.execute(response.toMessage(message.getChatId()));
                 return;
             }
 
             User user = userService.findOne(message.getChatId());
             if (user.getInputCurrency() == null) {
-
-                response.setText("Please set an input currency to convert from. 💡\n" +
-                        "You can use the `/from` command. \n" +
-                        "Examples: `/from MYR`, `/from MY`, or `/from Malaysia`.\n" +
-                        "Alternatively, you can simply send us your location, and we'll determine your input currency based on that. 🌍");
-
-                telegramBot.execute(response);
+                TelegramResponse response = messageService.createResponse("convert.missing.input.currency");
+                telegramBot.execute(response.toMessage(message.getChatId()));
                 return;
             }
 
             if (user.getOutputCurrency().isEmpty()) {
-                response.setText("Please set an output currency to convert to. 💡\n" +
-                        "You can use the `/to` command. \n" +
-                        "Examples: `/to SGD`, `/to SG`, or `/to Singapore`.");
-
-                telegramBot.execute(response);
+                TelegramResponse response = messageService.createResponse("convert.missing.output.currency");
+                telegramBot.execute(response.toMessage(message.getChatId()));
                 return;
             }
 
@@ -89,13 +80,12 @@ public class ConvertCommand implements Command {
                             .append("\n");
                 }
             }
-            response.setText(sb.toString());
-            telegramBot.execute(response);
+            
+            TelegramResponse response = TelegramResponse.builder().text(sb.toString());
+            telegramBot.execute(response.toMessage(message.getChatId()));
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
             throw new RuntimeException(e);
         }
-
-
     }
 }
