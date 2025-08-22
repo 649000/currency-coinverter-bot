@@ -189,7 +189,7 @@ class StartCommandTest {
     }
 
     @Test
-    void execute_ShouldHandleMessageServiceException_WhenCreateResponseFails() {
+    void execute_ShouldHandleMessageServiceException_WhenCreateResponseFails() throws TelegramApiException {
         // Given
         String args = "";
         RuntimeException serviceException = new RuntimeException("Message service error");
@@ -208,7 +208,7 @@ class StartCommandTest {
     }
 
     @Test
-    void execute_ShouldHandleUserServiceException_WhenFindOneFails() {
+    void execute_ShouldHandleUserServiceException_WhenFindOneFails() throws TelegramApiException {
         // Given
         Long chatId = 12345L;
         String args = "";
@@ -231,7 +231,7 @@ class StartCommandTest {
     }
 
     @Test
-    void execute_ShouldHandleUserServiceException_WhenCreateFails() {
+    void execute_ShouldHandleUserServiceException_WhenCreateFails() throws TelegramApiException {
         // Given
         Long chatId = 12345L;
         String args = "";
@@ -256,7 +256,7 @@ class StartCommandTest {
     }
 
     @Test
-    void execute_ShouldHandleTelegramResponseException_WhenToMessageFails() {
+    void execute_ShouldHandleTelegramResponseException_WhenToMessageFails() throws TelegramApiException {
         // Given
         Long chatId = 12345L;
         String args = "";
