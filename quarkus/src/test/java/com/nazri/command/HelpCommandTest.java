@@ -34,6 +34,9 @@ class HelpCommandTest {
     @Mock
     private SendMessage sendMessage;
 
+    @Mock
+    private Message executedMessage;
+
     private HelpCommand helpCommand;
 
     @BeforeEach
@@ -61,7 +64,7 @@ class HelpCommandTest {
         when(message.getChatId()).thenReturn(chatId);
         when(messageService.createResponse("help.content")).thenReturn(telegramResponse);
         when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
-        when(telegramBot.execute(sendMessage)).thenReturn(sendMessage);
+        when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
 
         // When
         helpCommand.execute(message, args);
@@ -81,7 +84,7 @@ class HelpCommandTest {
         when(message.getChatId()).thenReturn(chatId);
         when(messageService.createResponse("help.content")).thenReturn(telegramResponse);
         when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
-        when(telegramBot.execute(sendMessage)).thenReturn(sendMessage);
+        when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
 
         // When
         helpCommand.execute(message, args);
@@ -101,7 +104,7 @@ class HelpCommandTest {
         when(message.getChatId()).thenReturn(chatId);
         when(messageService.createResponse("help.content")).thenReturn(telegramResponse);
         when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
-        when(telegramBot.execute(sendMessage)).thenReturn(sendMessage);
+        when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
 
         // When
         helpCommand.execute(message, args);
@@ -184,7 +187,7 @@ class HelpCommandTest {
         when(message.getChatId()).thenReturn(chatId);
         when(messageService.createResponse("help.content")).thenReturn(telegramResponse);
         when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
-        when(telegramBot.execute(sendMessage)).thenReturn(sendMessage);
+        when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
 
         // When
         helpCommand.execute(message, args);
@@ -204,7 +207,7 @@ class HelpCommandTest {
         when(message.getChatId()).thenReturn(chatId);
         when(messageService.createResponse("help.content")).thenReturn(telegramResponse);
         when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
-        when(telegramBot.execute(sendMessage)).thenReturn(sendMessage);
+        when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
 
         // When
         helpCommand.execute(message, args);
