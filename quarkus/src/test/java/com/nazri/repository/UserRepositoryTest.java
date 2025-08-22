@@ -2,14 +2,13 @@ package com.nazri.repository;
 
 import com.nazri.model.User;
 import com.nazri.util.Constant;
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.GetItemEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
@@ -17,65 +16,36 @@ import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-
-@ExtendWith(MockitoExtension.class)
+@QuarkusTest
 class UserRepositoryTest {
 
-    @Mock
-    private DynamoDbEnhancedClient dynamoDbEnhancedClient;
+    @InjectMock
+    DynamoDbEnhancedClient dynamoDbEnhancedClient;
 
-    @Mock
-    private DynamoDbTable<User> userDynamoDbTable;
+    @InjectMock
+    DynamoDbTable<User> userDynamoDbTable;
 
-    private UserRepository userRepository;
+    @Inject
+    UserRepository userRepository;
 
     @BeforeEach
     void setUp() {
         when(dynamoDbEnhancedClient.table(eq(Constant.USER_TABLE), any(TableSchema.class)))
                 .thenReturn(userDynamoDbTable);
-        userRepository = new UserRepository(dynamoDbEnhancedClient);
     }
 
     @Test
-    void constructor_ShouldInitializeSuccessfully() {
-        // Given - mocks are already set up in setUp()
-        
-        // When - constructor is called in setUp()
+    void userRepository_ShouldBeInjected() {
+        // Given & When - userRepository is injected by Quarkus
         
         // Then
         assertNotNull(userRepository);
-        verify(dynamoDbEnhancedClient).table(eq(Constant.USER_TABLE), any(TableSchema.class));
-    }
-
-    @Test
-    void constructor_ShouldThrowRuntimeException_WhenDynamoDbExceptionOccurs() {
-        // Given
-        when(dynamoDbEnhancedClient.table(eq(Constant.USER_TABLE), any(TableSchema.class)))
-                .thenThrow(DynamoDbException.builder().message("DynamoDB error").build());
-
-        // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class, 
-                () -> new UserRepository(dynamoDbEnhancedClient));
-        assertEquals("DynamoDB table setup failed", exception.getMessage());
-    }
-
-    @Test
-    void constructor_ShouldThrowRuntimeException_WhenUnexpectedExceptionOccurs() {
-        // Given
-        when(dynamoDbEnhancedClient.table(eq(Constant.USER_TABLE), any(TableSchema.class)))
-                .thenThrow(new RuntimeException("Unexpected error"));
-
-        // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class, 
-                () -> new UserRepository(dynamoDbEnhancedClient));
-        assertEquals("Unexpected error during DynamoDB table setup", exception.getMessage());
     }
 
     @Test
