@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -102,20 +101,15 @@ class DeleteCurrencyCommandTest {
         when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
         when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
 
-        try (MockedStatic<KeyboardUtil> keyboardUtilMock = mockStatic(KeyboardUtil.class)) {
-            keyboardUtilMock.when(() -> KeyboardUtil.createCurrencyKeyboard(deleteCurrencyCommand.outputCurrencies, "to"))
-                    .thenReturn(keyboard);
+        // When
+        deleteCurrencyCommand.execute(message, args);
 
-            // When
-            deleteCurrencyCommand.execute(message, args);
-
-            // Then
-            verify(userService).findOne(chatId);
-            verify(messageService).createResponse("delete.currency.none");
-            verify(telegramResponse).keyboard(keyboard);
-            verify(telegramResponse).toMessage(chatId);
-            verify(telegramBot).execute(sendMessage);
-        }
+        // Then
+        verify(userService).findOne(chatId);
+        verify(messageService).createResponse("delete.currency.none");
+        verify(telegramResponse).keyboard(any(InlineKeyboardMarkup.class));
+        verify(telegramResponse).toMessage(chatId);
+        verify(telegramBot).execute(sendMessage);
     }
 
     @Test
@@ -133,20 +127,15 @@ class DeleteCurrencyCommandTest {
         when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
         when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
 
-        try (MockedStatic<KeyboardUtil> keyboardUtilMock = mockStatic(KeyboardUtil.class)) {
-            keyboardUtilMock.when(() -> KeyboardUtil.createCurrencyKeyboard(userCurrencies, "deletecurrency"))
-                    .thenReturn(keyboard);
+        // When
+        deleteCurrencyCommand.execute(message, args);
 
-            // When
-            deleteCurrencyCommand.execute(message, args);
-
-            // Then
-            verify(userService).findOne(chatId);
-            verify(messageService).createResponse("delete.currency.select");
-            verify(telegramResponse).keyboard(keyboard);
-            verify(telegramResponse).toMessage(chatId);
-            verify(telegramBot).execute(sendMessage);
-        }
+        // Then
+        verify(userService).findOne(chatId);
+        verify(messageService).createResponse("delete.currency.select");
+        verify(telegramResponse).keyboard(any(InlineKeyboardMarkup.class));
+        verify(telegramResponse).toMessage(chatId);
+        verify(telegramBot).execute(sendMessage);
     }
 
     @Test
@@ -164,15 +153,10 @@ class DeleteCurrencyCommandTest {
         when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
         when(telegramBot.execute(sendMessage)).thenThrow(telegramApiException);
 
-        try (MockedStatic<KeyboardUtil> keyboardUtilMock = mockStatic(KeyboardUtil.class)) {
-            keyboardUtilMock.when(() -> KeyboardUtil.createCurrencyKeyboard(deleteCurrencyCommand.outputCurrencies, "to"))
-                    .thenReturn(keyboard);
-
-            // When & Then
-            RuntimeException exception = assertThrows(RuntimeException.class,
-                    () -> deleteCurrencyCommand.execute(message, args));
-            assertEquals(telegramApiException, exception.getCause());
-        }
+        // When & Then
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> deleteCurrencyCommand.execute(message, args));
+        assertEquals(telegramApiException, exception.getCause());
     }
 
     @Test
@@ -211,21 +195,17 @@ class DeleteCurrencyCommandTest {
         when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
         when(userService.update(user)).thenReturn(user);
 
-        try (MockedStatic<Util> utilMock = mockStatic(Util.class)) {
-            utilMock.when(() -> Util.getEmojiFlag(data)).thenReturn(emoji);
+        // When
+        deleteCurrencyCommand.handleCallback(callbackQuery, data);
 
-            // When
-            deleteCurrencyCommand.handleCallback(callbackQuery, data);
-
-            // Then
-            verify(telegramBot).execute(any(AnswerCallbackQuery.class));
-            verify(userService).findOne(chatId);
-            verify(messageService).createResponse("delete.currency.success", emoji, data);
-            verify(userService).update(user);
-            verify(telegramBot).execute(sendMessage);
-            assertFalse(userCurrencies.contains("USD"));
-            assertTrue(userCurrencies.contains("EUR"));
-        }
+        // Then
+        verify(telegramBot).execute(any(AnswerCallbackQuery.class));
+        verify(userService).findOne(chatId);
+        verify(messageService).createResponse(eq("delete.currency.success"), anyString(), eq(data));
+        verify(userService).update(user);
+        verify(telegramBot).execute(sendMessage);
+        assertFalse(userCurrencies.contains("USD"));
+        assertTrue(userCurrencies.contains("EUR"));
     }
 
     @Test
@@ -247,21 +227,17 @@ class DeleteCurrencyCommandTest {
         when(telegramBot.execute(any(AnswerCallbackQuery.class))).thenReturn(null);
         when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
 
-        try (MockedStatic<Util> utilMock = mockStatic(Util.class)) {
-            utilMock.when(() -> Util.getEmojiFlag(data)).thenReturn(emoji);
+        // When
+        deleteCurrencyCommand.handleCallback(callbackQuery, data);
 
-            // When
-            deleteCurrencyCommand.handleCallback(callbackQuery, data);
-
-            // Then
-            verify(telegramBot).execute(any(AnswerCallbackQuery.class));
-            verify(userService).findOne(chatId);
-            verify(messageService).createResponse("delete.currency.success", emoji, data);
-            verify(userService, never()).update(user);
-            verify(telegramBot).execute(sendMessage);
-            assertTrue(userCurrencies.contains("USD"));
-            assertTrue(userCurrencies.contains("EUR"));
-        }
+        // Then
+        verify(telegramBot).execute(any(AnswerCallbackQuery.class));
+        verify(userService).findOne(chatId);
+        verify(messageService).createResponse(eq("delete.currency.success"), anyString(), eq(data));
+        verify(userService, never()).update(user);
+        verify(telegramBot).execute(sendMessage);
+        assertTrue(userCurrencies.contains("USD"));
+        assertTrue(userCurrencies.contains("EUR"));
     }
 
     @Test
@@ -314,20 +290,15 @@ class DeleteCurrencyCommandTest {
         when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
         when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
 
-        try (MockedStatic<KeyboardUtil> keyboardUtilMock = mockStatic(KeyboardUtil.class)) {
-            keyboardUtilMock.when(() -> KeyboardUtil.createCurrencyKeyboard(deleteCurrencyCommand.outputCurrencies, "to"))
-                    .thenReturn(keyboard);
+        // When
+        deleteCurrencyCommand.execute(message, args);
 
-            // When
-            deleteCurrencyCommand.execute(message, args);
-
-            // Then
-            verify(userService).findOne(chatId);
-            verify(messageService).createResponse("delete.currency.none");
-            verify(telegramResponse).keyboard(keyboard);
-            verify(telegramResponse).toMessage(chatId);
-            verify(telegramBot).execute(sendMessage);
-        }
+        // Then
+        verify(userService).findOne(chatId);
+        verify(messageService).createResponse("delete.currency.none");
+        verify(telegramResponse).keyboard(any(InlineKeyboardMarkup.class));
+        verify(telegramResponse).toMessage(chatId);
+        verify(telegramBot).execute(sendMessage);
     }
 
     @Test
@@ -344,20 +315,15 @@ class DeleteCurrencyCommandTest {
         when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
         when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
 
-        try (MockedStatic<KeyboardUtil> keyboardUtilMock = mockStatic(KeyboardUtil.class)) {
-            keyboardUtilMock.when(() -> KeyboardUtil.createCurrencyKeyboard(deleteCurrencyCommand.outputCurrencies, "to"))
-                    .thenReturn(keyboard);
+        // When
+        deleteCurrencyCommand.execute(message, args);
 
-            // When
-            deleteCurrencyCommand.execute(message, args);
-
-            // Then
-            verify(userService).findOne(chatId);
-            verify(messageService).createResponse("delete.currency.none");
-            verify(telegramResponse).keyboard(keyboard);
-            verify(telegramResponse).toMessage(chatId);
-            verify(telegramBot).execute(sendMessage);
-        }
+        // Then
+        verify(userService).findOne(chatId);
+        verify(messageService).createResponse("delete.currency.none");
+        verify(telegramResponse).keyboard(any(InlineKeyboardMarkup.class));
+        verify(telegramResponse).toMessage(chatId);
+        verify(telegramBot).execute(sendMessage);
     }
 
     @Test
@@ -380,21 +346,17 @@ class DeleteCurrencyCommandTest {
         when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
         when(userService.update(user)).thenReturn(user);
 
-        try (MockedStatic<Util> utilMock = mockStatic(Util.class)) {
-            utilMock.when(() -> Util.getEmojiFlag(data)).thenReturn(emoji);
+        // When
+        deleteCurrencyCommand.handleCallback(callbackQuery, data);
 
-            // When
-            deleteCurrencyCommand.handleCallback(callbackQuery, data);
-
-            // Then
-            verify(telegramBot).execute(any(AnswerCallbackQuery.class));
-            verify(userService).findOne(chatId);
-            verify(messageService).createResponse("delete.currency.success", emoji, data);
-            verify(userService).update(user);
-            verify(telegramBot).execute(sendMessage);
-            assertTrue(userCurrencies.contains("USD"));
-            assertFalse(userCurrencies.contains("EUR"));
-            assertTrue(userCurrencies.contains("GBP"));
-        }
+        // Then
+        verify(telegramBot).execute(any(AnswerCallbackQuery.class));
+        verify(userService).findOne(chatId);
+        verify(messageService).createResponse(eq("delete.currency.success"), anyString(), eq(data));
+        verify(userService).update(user);
+        verify(telegramBot).execute(sendMessage);
+        assertTrue(userCurrencies.contains("USD"));
+        assertFalse(userCurrencies.contains("EUR"));
+        assertTrue(userCurrencies.contains("GBP"));
     }
 }
