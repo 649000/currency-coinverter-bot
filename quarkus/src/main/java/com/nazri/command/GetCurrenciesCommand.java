@@ -1,9 +1,9 @@
 package com.nazri.command;
 
+import com.nazri.model.TelegramResponse;
 import com.nazri.model.User;
 import com.nazri.service.MessageService;
 import com.nazri.service.TelegramBot;
-import com.nazri.model.TelegramResponse;
 import com.nazri.service.UserService;
 import com.nazri.util.KeyboardUtil;
 import com.nazri.util.Util;
@@ -15,11 +15,8 @@ import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
@@ -50,10 +47,10 @@ public class GetCurrenciesCommand implements Command {
     @Override
     public void execute(Message message, String args) {
         User user = userService.findOne(message.getChatId());
-        
+
         try {
             TelegramResponse response;
-            
+
             if (user.getInputCurrency() == null && user.getOutputCurrency().isEmpty()) {
                 response = messageService.createResponse("getcurrencies.empty");
             } else if (user.getInputCurrency() == null) {
@@ -61,15 +58,15 @@ public class GetCurrenciesCommand implements Command {
                 response = messageService.createResponse("getcurrencies.no.input", outputList)
                         .keyboard(KeyboardUtil.createCurrencyKeyboard(inputCurrencies, "from"));
             } else if (user.getOutputCurrency().isEmpty()) {
-                response = messageService.createResponse("getcurrencies.no.output", 
-                        Util.getEmojiFlag(user.getInputCurrency()), user.getInputCurrency())
+                response = messageService.createResponse("getcurrencies.no.output",
+                                Util.getEmojiFlag(user.getInputCurrency()), user.getInputCurrency())
                         .keyboard(KeyboardUtil.createCurrencyKeyboard(outputCurrencies, "to"));
             } else {
                 String outputList = formatOutputCurrencies(user.getOutputCurrency());
-                response = messageService.createResponse("getcurrencies.complete", 
+                response = messageService.createResponse("getcurrencies.complete",
                         Util.getEmojiFlag(user.getInputCurrency()), user.getInputCurrency(), outputList);
             }
-            
+
             telegramBot.execute(response.toMessage(message.getChatId()));
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
@@ -98,11 +95,11 @@ public class GetCurrenciesCommand implements Command {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < currencies.size(); i++) {
             sb.append(i + 1)
-              .append(". ")
-              .append(Util.getEmojiFlag(currencies.get(i)))
-              .append(" *")
-              .append(currencies.get(i))
-              .append("*\n");
+                    .append(". ")
+                    .append(Util.getEmojiFlag(currencies.get(i)))
+                    .append(" *")
+                    .append(currencies.get(i))
+                    .append("*\n");
         }
         return sb.toString();
     }

@@ -1,10 +1,10 @@
 package com.nazri.command;
 
+import com.nazri.model.TelegramResponse;
 import com.nazri.model.User;
 import com.nazri.service.CurrencyService;
 import com.nazri.service.MessageService;
 import com.nazri.service.TelegramBot;
-import com.nazri.model.TelegramResponse;
 import com.nazri.service.UserService;
 import com.nazri.util.KeyboardUtil;
 import com.nazri.util.Util;
@@ -16,11 +16,8 @@ import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
@@ -56,20 +53,21 @@ public class FromCurrencyCommand implements Command {
      */
     @Override
     public void execute(Message message, String args) {
-        String currencyCode = currencyService.getCurrencyCode(args);
-        
         try {
             TelegramResponse response;
-            
-            if (currencyCode == null) {
+            String currencyCode = currencyService.getCurrencyCode(args);
+            if (args == null || args.isEmpty()) {
+                response = messageService.createResponse("from.currency.empty")
+                        .keyboard(KeyboardUtil.createCurrencyKeyboard(inputCurrencies, getName()));
+            } else if (currencyCode == null) {
                 response = messageService.createResponse("from.currency.invalid")
                         .keyboard(KeyboardUtil.createCurrencyKeyboard(inputCurrencies, getName()));
             } else {
                 User user = userService.findOne(message.getChatId());
                 user.setInputCurrency(currencyCode);
                 userService.update(user);
-                
-                response = messageService.createResponse("from.currency.set", 
+
+                response = messageService.createResponse("from.currency.set",
                         Util.getEmojiFlag(currencyCode), currencyCode);
             }
 
