@@ -13,7 +13,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -153,8 +153,8 @@ class HelpCommandTest {
         assertEquals(serviceException, exception);
         
         verify(messageService).createResponse("help.content");
-        verify(telegramResponse, never()).toMessage(any());
-        verify(telegramBot, never()).execute(any());
+        verify(telegramResponse, never()).toMessage(anyString());
+        verify(telegramBot, never()).execute(any(SendMessage.class));
     }
 
     @Test
@@ -175,7 +175,7 @@ class HelpCommandTest {
         
         verify(messageService).createResponse("help.content");
         verify(telegramResponse).toMessage(String.valueOf(chatId));
-        verify(telegramBot, never()).execute(any());
+        verify(telegramBot, never()).execute(any(SendMessage.class));
     }
 
     @Test
