@@ -50,6 +50,12 @@ public class ConvertCommand implements Command {
     @ConfigProperty(name = "top.input.currencies")
     List<String> inputCurrencies;
 
+    @ConfigProperty(name = "multiplier.input")
+    List<String> multiplierList;
+
+    @ConfigProperty(name = "multiplier.symbol")
+    List<String> multiplierSymbols;
+
     @Override
     public String getName() {
         return "convert";
@@ -96,7 +102,8 @@ public class ConvertCommand implements Command {
             }
 
             TelegramResponse response = messageService.createResponse("convert.result", 
-                fromCurrency, toCurrencies.toString());
+                fromCurrency, toCurrencies.toString())
+                    .keyboard(createMultiplierKeyboard(inputAmount));
             telegramBot.execute(response.toMessage(message.getChatId()));
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
@@ -162,6 +169,31 @@ public class ConvertCommand implements Command {
             } else {
                 button.setCallbackData("to" + ":" + currencyCode);
             }
+            rowInline.add(button);
+        }
+
+        // Add the row to rows list
+        rowsInline.add(rowInline);
+
+        // Set the keyboard to the message
+        markupInline.setKeyboard(rowsInline);
+
+        return markupInline;
+    }
+
+    private InlineKeyboardMarkup createMultiplierKeyboard(BigDecimal inputAmount) {
+        // Create inline keyboard
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+
+        // First row of buttons
+        List<InlineKeyboardButton> rowInline = new ArrayList<>();
+        for (int i = 0; i < multiplierList.size(); i++) {
+            InlineKeyboardButton button = new InlineKeyboardButton();
+            button.setText(multiplierSymbols.get(i));
+            BigDecimal value = new BigDecimal(inputAmount* BigDecimal.valueOf(multiplierList.get(i)));
+            button.setCallbackData(getName() + ":" + value);
+
             rowInline.add(button);
         }
 
