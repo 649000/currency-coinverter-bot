@@ -140,11 +140,9 @@ class HelpCommandTest {
     @Test
     void execute_ShouldHandleMessageServiceException_WhenCreateResponseFails() throws TelegramApiException {
         // Given
-        Long chatId = 12345L;
         String args = "";
         RuntimeException serviceException = new RuntimeException("Message service error");
         
-        when(message.getChatId()).thenReturn(chatId);
         when(messageService.createResponse("help.content")).thenThrow(serviceException);
 
         // When & Then
