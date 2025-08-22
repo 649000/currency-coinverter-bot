@@ -138,7 +138,7 @@ class HelpCommandTest {
     }
 
     @Test
-    void execute_ShouldHandleMessageServiceException_WhenCreateResponseFails() {
+    void execute_ShouldHandleMessageServiceException_WhenCreateResponseFails() throws TelegramApiException {
         // Given
         Long chatId = 12345L;
         String args = "";
@@ -158,7 +158,7 @@ class HelpCommandTest {
     }
 
     @Test
-    void execute_ShouldHandleTelegramResponseException_WhenToMessageFails() {
+    void execute_ShouldHandleTelegramResponseException_WhenToMessageFails() throws TelegramApiException {
         // Given
         Long chatId = 12345L;
         String args = "";
