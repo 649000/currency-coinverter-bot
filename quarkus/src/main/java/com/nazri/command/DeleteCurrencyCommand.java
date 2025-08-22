@@ -1,15 +1,15 @@
 package com.nazri.command;
 
 import com.nazri.model.User;
+import com.nazri.service.MessageService;
 import com.nazri.service.TelegramBot;
+import com.nazri.service.TelegramResponse;
 import com.nazri.service.UserService;
-import com.nazri.util.Constant;
 import com.nazri.util.Util;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -29,6 +29,9 @@ public class DeleteCurrencyCommand implements Command {
 
     @Inject
     TelegramBot telegramBot;
+
+    @Inject
+    MessageService messageService;
 
     @Override
     public String getName() {
@@ -95,20 +98,35 @@ public class DeleteCurrencyCommand implements Command {
         try {
             telegramBot.execute(answerCallbackQuery);
 
-            SendMessage response = new SendMessage();
-            response.setChatId(String.valueOf(callbackQuery.getMessage().getChatId()));
-            response.setParseMode(Constant.MARKDOWN);
-            response.setText("The currency "+ Util.getEmojiFlag(data) +"*" + data + "* has been deleted ✅.");
+            TelegramResponse response = messageService.createResponse("delete.currency.success", 
+                    Util.getEmojiFlag(data), data);
 
             User user = userService.findOne(callbackQuery.getMessage().getChatId());
             if(user.getOutputCurrency().remove(data)) {
                 userService.update(user);
             }
 
-            telegramBot.execute(response);
+            telegramBot.execute(response.toMessage(callbackQuery.getMessage().getChatId()));
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+
+    private InlineKeyboardMarkup createCurrencyKeyboard(List<String> currencies) {
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline = new ArrayList<>();
+
+        for (String currencyCode : currencies) {
+            InlineKeyboardButton button = new InlineKeyboardButton();
+            button.setText(Util.getEmojiFlag(currencyCode) + " " + currencyCode);
+            button.setCallbackData(getName() + ":" + currencyCode);
+            rowInline.add(button);
+        }
+
+        rowsInline.add(rowInline);
+        markupInline.setKeyboard(rowsInline);
+        return markupInline;
     }
 }
