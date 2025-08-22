@@ -206,7 +206,7 @@ class HelpCommandTest {
         
         when(message.getChatId()).thenReturn(chatId);
         when(messageService.createResponse("help.content")).thenReturn(telegramResponse);
-        when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
+        when(telegramResponse.toMessage(String.valueOf(chatId))).thenReturn(sendMessage);
         when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
 
         // When
