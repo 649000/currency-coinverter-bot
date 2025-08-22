@@ -63,7 +63,7 @@ class HelpCommandTest {
         
         when(message.getChatId()).thenReturn(chatId);
         when(messageService.createResponse("help.content")).thenReturn(telegramResponse);
-        when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
+        when(telegramResponse.toMessage(String.valueOf(chatId))).thenReturn(sendMessage);
         when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
 
         // When
@@ -71,7 +71,7 @@ class HelpCommandTest {
 
         // Then
         verify(messageService).createResponse("help.content");
-        verify(telegramResponse).toMessage(chatId);
+        verify(telegramResponse).toMessage(String.valueOf(chatId));
         verify(telegramBot).execute(sendMessage);
     }
 
@@ -83,7 +83,7 @@ class HelpCommandTest {
         
         when(message.getChatId()).thenReturn(chatId);
         when(messageService.createResponse("help.content")).thenReturn(telegramResponse);
-        when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
+        when(telegramResponse.toMessage(String.valueOf(chatId))).thenReturn(sendMessage);
         when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
 
         // When
@@ -91,7 +91,7 @@ class HelpCommandTest {
 
         // Then
         verify(messageService).createResponse("help.content");
-        verify(telegramResponse).toMessage(chatId);
+        verify(telegramResponse).toMessage(String.valueOf(chatId));
         verify(telegramBot).execute(sendMessage);
     }
 
@@ -103,7 +103,7 @@ class HelpCommandTest {
         
         when(message.getChatId()).thenReturn(chatId);
         when(messageService.createResponse("help.content")).thenReturn(telegramResponse);
-        when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
+        when(telegramResponse.toMessage(String.valueOf(chatId))).thenReturn(sendMessage);
         when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
 
         // When
@@ -111,7 +111,7 @@ class HelpCommandTest {
 
         // Then
         verify(messageService).createResponse("help.content");
-        verify(telegramResponse).toMessage(chatId);
+        verify(telegramResponse).toMessage(String.valueOf(chatId));
         verify(telegramBot).execute(sendMessage);
     }
 
@@ -124,7 +124,7 @@ class HelpCommandTest {
         
         when(message.getChatId()).thenReturn(chatId);
         when(messageService.createResponse("help.content")).thenReturn(telegramResponse);
-        when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
+        when(telegramResponse.toMessage(String.valueOf(chatId))).thenReturn(sendMessage);
         when(telegramBot.execute(sendMessage)).thenThrow(telegramApiException);
 
         // When & Then
@@ -133,7 +133,7 @@ class HelpCommandTest {
         assertEquals(telegramApiException, exception.getCause());
         
         verify(messageService).createResponse("help.content");
-        verify(telegramResponse).toMessage(chatId);
+        verify(telegramResponse).toMessage(String.valueOf(chatId));
         verify(telegramBot).execute(sendMessage);
     }
 
@@ -166,7 +166,7 @@ class HelpCommandTest {
         
         when(message.getChatId()).thenReturn(chatId);
         when(messageService.createResponse("help.content")).thenReturn(telegramResponse);
-        when(telegramResponse.toMessage(chatId)).thenThrow(responseException);
+        when(telegramResponse.toMessage(String.valueOf(chatId))).thenThrow(responseException);
 
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class,
@@ -174,7 +174,7 @@ class HelpCommandTest {
         assertEquals(responseException, exception);
         
         verify(messageService).createResponse("help.content");
-        verify(telegramResponse).toMessage(chatId);
+        verify(telegramResponse).toMessage(String.valueOf(chatId));
         verify(telegramBot, never()).execute(any());
     }
 
@@ -186,7 +186,7 @@ class HelpCommandTest {
         
         when(message.getChatId()).thenReturn(chatId);
         when(messageService.createResponse("help.content")).thenReturn(telegramResponse);
-        when(telegramResponse.toMessage(chatId)).thenReturn(sendMessage);
+        when(telegramResponse.toMessage(String.valueOf(chatId))).thenReturn(sendMessage);
         when(telegramBot.execute(sendMessage)).thenReturn(executedMessage);
 
         // When
@@ -194,7 +194,7 @@ class HelpCommandTest {
 
         // Then
         verify(messageService).createResponse("help.content");
-        verify(telegramResponse).toMessage(chatId);
+        verify(telegramResponse).toMessage(String.valueOf(chatId));
         verify(telegramBot).execute(sendMessage);
     }
 
