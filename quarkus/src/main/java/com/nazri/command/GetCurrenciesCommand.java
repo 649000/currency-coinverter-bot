@@ -12,6 +12,8 @@ import org.jboss.logging.Logger;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.List;
+
 @ApplicationScoped
 public class GetCurrenciesCommand implements Command {
 
