@@ -63,7 +63,7 @@ public class FromCurrencyCommand implements Command {
             
             if (currencyCode == null) {
                 response = messageService.createResponse("from.currency.invalid")
-                        .keyboard(createCurrencyKeyboard());
+                        .keyboard(KeyboardUtil.createCurrencyKeyboard(inputCurrencies, getName()));
             } else {
                 User user = userService.findOne(message.getChatId());
                 user.setInputCurrency(currencyCode);
@@ -97,7 +97,4 @@ public class FromCurrencyCommand implements Command {
         }
     }
 
-    private InlineKeyboardMarkup createCurrencyKeyboard() {
-        return KeyboardUtil.createCurrencyKeyboard(inputCurrencies, getName());
-    }
 }

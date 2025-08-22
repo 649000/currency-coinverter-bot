@@ -67,7 +67,7 @@ public class ConvertCommand implements Command {
         try {
             if (!Util.isNumeric(args)) {
                 TelegramResponse response = messageService.createResponse("convert.invalid.numeric")
-                        .keyboard(createCommonAmountKeyboard());
+                        .keyboard(KeyboardUtil.createAmountKeyboard(commonAmount, getName()));
                 telegramBot.execute(response.toMessage(message.getChatId()));
                 return;
             }
@@ -75,14 +75,14 @@ public class ConvertCommand implements Command {
             User user = userService.findOne(message.getChatId());
             if (user.getInputCurrency() == null) {
                 TelegramResponse response = messageService.createResponse("convert.missing.input.currency")
-                        .keyboard(createCurrencyKeyboard(inputCurrencies, true));
+                        .keyboard(KeyboardUtil.createCurrencyKeyboard(inputCurrencies, "from"));
                 telegramBot.execute(response.toMessage(message.getChatId()));
                 return;
             }
 
             if (user.getOutputCurrency().isEmpty()) {
                 TelegramResponse response = messageService.createResponse("convert.missing.output.currency")
-                        .keyboard(createCurrencyKeyboard(outputCurrencies, false));
+                        .keyboard(KeyboardUtil.createCurrencyKeyboard(outputCurrencies, "to"));
                 telegramBot.execute(response.toMessage(message.getChatId()));
                 return;
             }
@@ -104,7 +104,7 @@ public class ConvertCommand implements Command {
 
             TelegramResponse response = messageService.createResponse("convert.result", 
                 fromCurrency, toCurrencies.toString())
-                    .keyboard(createMultiplierKeyboard(inputAmount));
+                    .keyboard(KeyboardUtil.createMultiplierKeyboard(inputAmount, multiplierList, multiplierSymbols, getName()));
             telegramBot.execute(response.toMessage(message.getChatId()));
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
@@ -129,16 +129,4 @@ public class ConvertCommand implements Command {
         }
     }
 
-    private InlineKeyboardMarkup createCommonAmountKeyboard() {
-        return KeyboardUtil.createAmountKeyboard(commonAmount, getName());
-    }
-
-    private InlineKeyboardMarkup createCurrencyKeyboard(List<String> currencies, boolean inputCurrency) {
-        String commandPrefix = inputCurrency ? "from" : "to";
-        return KeyboardUtil.createCurrencyKeyboard(currencies, commandPrefix);
-    }
-
-    private InlineKeyboardMarkup createMultiplierKeyboard(BigDecimal inputAmount) {
-        return KeyboardUtil.createMultiplierKeyboard(inputAmount, multiplierList, multiplierSymbols, getName());
-    }
 }

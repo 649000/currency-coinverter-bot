@@ -59,11 +59,11 @@ public class GetCurrenciesCommand implements Command {
             } else if (user.getInputCurrency() == null) {
                 String outputList = formatOutputCurrencies(user.getOutputCurrency());
                 response = messageService.createResponse("getcurrencies.no.input", outputList)
-                        .keyboard(createCurrencyKeyboard(inputCurrencies, true));
+                        .keyboard(KeyboardUtil.createCurrencyKeyboard(inputCurrencies, "from"));
             } else if (user.getOutputCurrency().isEmpty()) {
                 response = messageService.createResponse("getcurrencies.no.output", 
                         Util.getEmojiFlag(user.getInputCurrency()), user.getInputCurrency())
-                        .keyboard(createCurrencyKeyboard(outputCurrencies, false));
+                        .keyboard(KeyboardUtil.createCurrencyKeyboard(outputCurrencies, "to"));
             } else {
                 String outputList = formatOutputCurrencies(user.getOutputCurrency());
                 response = messageService.createResponse("getcurrencies.complete", 
@@ -105,11 +105,6 @@ public class GetCurrenciesCommand implements Command {
               .append("*\n");
         }
         return sb.toString();
-    }
-
-    private InlineKeyboardMarkup createCurrencyKeyboard(List<String> currencies, boolean inputCurrency) {
-        String commandPrefix = inputCurrency ? "from" : "to";
-        return KeyboardUtil.createCurrencyKeyboard(currencies, commandPrefix);
     }
 
 }

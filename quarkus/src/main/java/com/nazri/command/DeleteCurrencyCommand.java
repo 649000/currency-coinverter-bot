@@ -58,10 +58,10 @@ public class DeleteCurrencyCommand implements Command {
 
             if (user.getOutputCurrency().isEmpty()) {
                 response = messageService.createResponse("delete.currency.none")
-                        .keyboard(createCurrencyKeyboard(inputCurrencies, true));
+                        .keyboard(KeyboardUtil.createCurrencyKeyboard(inputCurrencies, "from"));
             } else {
                 response = messageService.createResponse("delete.currency.select")
-                        .keyboard(createCurrencyKeyboard(user.getOutputCurrency(), false));
+                        .keyboard(KeyboardUtil.createCurrencyKeyboard(user.getOutputCurrency(), getName()));
             }
 
             telegramBot.execute(response.toMessage(message.getChatId()));
@@ -92,8 +92,4 @@ public class DeleteCurrencyCommand implements Command {
         }
     }
 
-    private InlineKeyboardMarkup createCurrencyKeyboard(List<String> currencies, boolean inputCurrency) {
-        String commandPrefix = inputCurrency ? "from" : getName();
-        return KeyboardUtil.createCurrencyKeyboard(currencies, commandPrefix);
-    }
 }
