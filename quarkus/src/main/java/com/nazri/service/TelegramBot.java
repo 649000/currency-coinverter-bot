@@ -118,24 +118,8 @@ public class TelegramBot extends TelegramWebhookBot {
      */
     private void processRegularMessage(Message message) {
         log.infof("Processing Regular Message: %s", message.getText());
-
-        if (Util.isNumeric(message.getText())) {
-            message.setText("/convert " + message.getText());
-            processCommand(message);
-            return;
-        } else {
-            log.info("Regular Message Received: " + message.getText());
-
-            SendMessage response = new SendMessage();
-            response.setText("Please enter a numeric value to convert.");
-            response.setChatId(message.getChatId());
-
-            try {
-                execute(response);
-            } catch (TelegramApiException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        message.setText("/convert " + message.getText());
+        processCommand(message);
     }
 
     /**
@@ -159,7 +143,6 @@ public class TelegramBot extends TelegramWebhookBot {
             String[] parts = callbackQuery.getData().split(":" );
             String commandName = parts[0];
             String data = parts.length > 1 ? parts[1] : "";
-
             Command command = commandRegistry.getCommand(commandName);
             if (command != null) {
                 command.handleCallback(callbackQuery, data);
