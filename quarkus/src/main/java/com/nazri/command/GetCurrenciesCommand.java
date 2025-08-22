@@ -36,40 +36,40 @@ public class GetCurrenciesCommand implements Command {
         User user = userService.findOne(message.getChatId());
         
         try {
-            StringBuilder inputCurrency = new StringBuilder();
-            if (user.getInputCurrency() == null) {
-                inputCurrency.append("\n\n");
+            TelegramResponse response;
+            
+            if (user.getInputCurrency() == null && user.getOutputCurrency().isEmpty()) {
+                response = messageService.createResponse("getcurrencies.empty");
+            } else if (user.getInputCurrency() == null) {
+                String outputList = formatOutputCurrencies(user.getOutputCurrency());
+                response = messageService.createResponse("getcurrencies.no.input", outputList);
+            } else if (user.getOutputCurrency().isEmpty()) {
+                response = messageService.createResponse("getcurrencies.no.output", 
+                        Util.getEmojiFlag(user.getInputCurrency()), user.getInputCurrency());
             } else {
-                inputCurrency.append("1. ")
-                        .append(Util.getEmojiFlag(user.getInputCurrency()))
-                        .append(" *")
-                        .append(user.getInputCurrency())
-                        .append("*\n\n");
+                String outputList = formatOutputCurrencies(user.getOutputCurrency());
+                response = messageService.createResponse("getcurrencies.complete", 
+                        Util.getEmojiFlag(user.getInputCurrency()), user.getInputCurrency(), outputList);
             }
-
-            StringBuilder outputCurrencies = new StringBuilder();
-            for (int i = 0; i < user.getOutputCurrency().size(); i++) {
-                outputCurrencies.append(i + 1)
-                        .append(". ")
-                        .append(Util.getEmojiFlag(user.getOutputCurrency().get(i)))
-                        .append(" *")
-                        .append(user.getOutputCurrency().get(i))
-                        .append("* \n");
-            }
-
-            String helpText = "";
-            if (user.getInputCurrency() == null || user.getOutputCurrency().isEmpty()) {
-                helpText = "\n\nUse /help to know more on setting your input/output currencies";
-            }
-
-            TelegramResponse response = messageService.createResponse("getcurrencies.display", 
-                    inputCurrency.toString(), outputCurrencies.toString(), helpText);
             
             telegramBot.execute(response.toMessage(message.getChatId()));
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+
+    private String formatOutputCurrencies(List<String> currencies) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < currencies.size(); i++) {
+            sb.append(i + 1)
+              .append(". ")
+              .append(Util.getEmojiFlag(currencies.get(i)))
+              .append(" *")
+              .append(currencies.get(i))
+              .append("*\n");
+        }
+        return sb.toString();
     }
 
 }
