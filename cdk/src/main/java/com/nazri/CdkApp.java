@@ -63,7 +63,7 @@ public class CdkApp {
      * @param env the environment string from context
      * @return normalized environment (DEV or PRD)
      */
-    private static String normalizeEnvironment(String env) {
+    public static String normalizeEnvironment(String env) {
         if (env == null || env.trim().isEmpty()) {
             System.out.println("No environment specified, defaulting to: " + Constant.DEV);
             return Constant.DEV;
