@@ -11,8 +11,11 @@ import java.util.Arrays;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class Util {
+
+    private static final Map<String, Locale> currencyLocaleCache = new HashMap<>();
 
     public static String getCurrentTime() {
         return Instant.now().atZone(ZoneId.of("Asia/Singapore")).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
@@ -76,24 +79,20 @@ public class Util {
      * @return The most appropriate Locale
      */
     private static Locale findLocaleForCurrency(Currency currency) {
-        // Get all available locales
-        Locale[] allLocales = Locale.getAvailableLocales();
-
-        // First try: Find a locale where this is the primary currency
-        for (Locale locale : allLocales) {
-            try {
-                if (Currency.getInstance(locale).getCurrencyCode()
-                        .equals(currency.getCurrencyCode())) {
-                    return locale;
+        return currencyLocaleCache.computeIfAbsent(currency.getCurrencyCode(), code -> {
+            Locale[] allLocales = Locale.getAvailableLocales();
+            for (Locale locale : allLocales) {
+                try {
+                    if (Currency.getInstance(locale).getCurrencyCode().equals(code)) {
+                        return locale;
+                    }
+                } catch (IllegalArgumentException e) {
+                    // Skip locales without currency information
+                    continue;
                 }
-            } catch (IllegalArgumentException e) {
-                // Skip locales without currency information
-                continue;
             }
-        }
-
-        // Fallback to US locale if no matching locale found
-        return Locale.US;
+            return Locale.US;
+        });
     }
 
     public static String getEmojiFlag(String currencyCode) {
