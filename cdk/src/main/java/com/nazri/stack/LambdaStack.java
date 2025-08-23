@@ -30,7 +30,6 @@ import java.util.Map;
  */
 public class LambdaStack extends Stack {
     private final Function restAPIFunction;
-    private final StackConfig stackConfig;
 
     /**
      * Constructs a new Lambda stack.
@@ -44,9 +43,8 @@ public class LambdaStack extends Stack {
      */
     public LambdaStack(final Construct scope, final String id, final StackProps props, StackConfig stackConfig, Table table, HttpApi httpApi) {
         super(scope, id, props);
-        this.stackConfig = stackConfig;
 
-        if (this.stackConfig.getGraalvm()) {
+        if (stackConfig.getGraalvm()) {
             this.restAPIFunction = createNativeFunction();
         } else {
             this.restAPIFunction = createNonNativeFunction();

@@ -28,7 +28,13 @@ public class CdkApp {
         App app = new App();
 
         // Get environment from context or default to dev
-        String environment = Constant.DEV;
+        String environment = (String) app.getNode().tryGetContext("env");
+
+        if (environment.equalsIgnoreCase(Constant.PRD)) {
+            environment = Constant.PRD;
+        } else {
+            environment = Constant.DEV;
+        }
 
         StackConfig stackConfig = getStackConfig(environment);
 
@@ -65,14 +71,9 @@ public class CdkApp {
     public static StackConfig getStackConfig(String environment) {
         StackConfig stackConfig;
         switch (environment) {
-            case Constant.SIT:
+            case Constant.PRD:
                 stackConfig = new StackConfig.Builder()
-                        .withEnvironment(Constant.SIT)
-                        .build();
-                break;
-            case Constant.UAT:
-                stackConfig = new StackConfig.Builder()
-                        .withEnvironment(Constant.UAT)
+                        .withEnvironment(Constant.PRD)
                         .build();
                 break;
             default:

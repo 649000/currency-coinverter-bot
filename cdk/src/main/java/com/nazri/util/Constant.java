@@ -11,8 +11,6 @@ public final class Constant {
     public static final String ENVIRONMENT = "environment";
 
     public static final String DEV = "dev";
-    public static final String SIT = "sit";
-    public static final String UAT = "uat";
     public static final String PRD = "prd";
 
     //DynamoDB Table Names

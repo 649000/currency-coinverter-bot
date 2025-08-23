@@ -44,7 +44,6 @@ public class StackConfig {
             switch (environment) {
                 case Constant.DEV -> {
                     logger.info("DEV StackConfig");
-                    // TODO: Retrieve Account and Region from cdk.json
                     tags.put(Constant.ENVIRONMENT, Constant.DEV);
                     stackProps.env(Environment.builder()
                                     .region("ap-southeast-1")
@@ -52,6 +51,16 @@ public class StackConfig {
                             )
                             .tags(tags);
                     graalvm = false;
+                }
+                case Constant.PRD -> {
+                    logger.info("PRD StackConfig");
+                    tags.put(Constant.ENVIRONMENT, Constant.PRD);
+                    stackProps.env(Environment.builder()
+                                    .region("ap-southeast-1")
+                                    .build()
+                            )
+                            .tags(tags);
+                    graalvm = true;
                 }
             }
             return this;
