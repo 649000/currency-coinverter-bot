@@ -1,5 +1,6 @@
 package com.nazri.util;
 
+import io.quarkus.cache.CacheResult;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 import java.math.BigDecimal;
@@ -7,15 +8,10 @@ import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.Currency;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 public class Util {
-
-    private static final Map<String, Locale> currencyLocaleCache = new HashMap<>();
 
     public static String getCurrentTime() {
         return Instant.now().atZone(ZoneId.of("Asia/Singapore")).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
@@ -78,21 +74,20 @@ public class Util {
      * @param currency The Currency to find a locale for
      * @return The most appropriate Locale
      */
+    @CacheResult(cacheName = "currency-locales")
     private static Locale findLocaleForCurrency(Currency currency) {
-        return currencyLocaleCache.computeIfAbsent(currency.getCurrencyCode(), code -> {
-            Locale[] allLocales = Locale.getAvailableLocales();
-            for (Locale locale : allLocales) {
-                try {
-                    if (Currency.getInstance(locale).getCurrencyCode().equals(code)) {
-                        return locale;
-                    }
-                } catch (IllegalArgumentException e) {
-                    // Skip locales without currency information
-                    continue;
+        Locale[] allLocales = Locale.getAvailableLocales();
+        for (Locale locale : allLocales) {
+            try {
+                if (Currency.getInstance(locale).getCurrencyCode().equals(currency.getCurrencyCode())) {
+                    return locale;
                 }
+            } catch (IllegalArgumentException e) {
+                // Skip locales without currency information
+                continue;
             }
-            return Locale.US;
-        });
+        }
+        return Locale.US;
     }
 
     public static String getEmojiFlag(String currencyCode) {
