@@ -7,6 +7,7 @@ import software.amazon.awscdk.App;
 import software.amazon.awscdk.StackProps;
 import software.amazon.awscdk.assertions.Template;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -88,6 +89,30 @@ public class APIGatewayStackTest {
                         "project", "currencycoinverter",
                         "environment", "dev"
                 )
+        ));
+    }
+
+    /**
+     * Tests that the API Gateway has the correct default stage.
+     */
+    @Test
+    public void testAPIGatewayHasDefaultStage() {
+        // Given
+        App app = new App();
+        StackConfig stackConfig = new StackConfig.Builder()
+                .withEnvironment(Constant.DEV)
+                .build();
+
+        // When
+        APIGatewayStack stack = new APIGatewayStack(app, "test-api-stack",
+                StackProps.builder().build(), stackConfig);
+
+        // Then
+        Template template = Template.fromStack(stack);
+        
+        // Verify default stage is created
+        template.hasResourceProperties("AWS::ApiGatewayV2::Stage", Map.of(
+                "StageName", "$default"
         ));
     }
 }

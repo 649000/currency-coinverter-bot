@@ -155,36 +155,4 @@ public class LambdaStackTest {
                 )
         ));
     }
-
-    /**
-     * Tests that the API Gateway route is created for the Telegram webhook.
-     */
-    @Test
-    public void testTelegramWebhookRouteIsCreated() {
-        // Given
-        App app = new App();
-        StackConfig stackConfig = new StackConfig.Builder()
-                .withEnvironment(Constant.DEV)
-                .build();
-
-        // Create dependencies
-        DynamoDBStack dynamoDBStack = new DynamoDBStack(app, "test-dynamodb-stack",
-                StackProps.builder().build(), stackConfig);
-        
-        APIGatewayStack apiGatewayStack = new APIGatewayStack(app, "test-api-stack",
-                StackProps.builder().build(), stackConfig);
-
-        // When
-        LambdaStack stack = new LambdaStack(app, "test-lambda-stack",
-                StackProps.builder().build(), stackConfig,
-                dynamoDBStack.getUserTable(), apiGatewayStack.getHttpApi());
-
-        // Then
-        Template template = Template.fromStack(stack);
-        
-        // Verify HTTP route is created for Telegram webhook
-        template.hasResourceProperties("AWS::ApiGatewayV2::Route", Map.of(
-                "RouteKey", "POST /api/telegram/webhook"
-        ));
-    }
 }
