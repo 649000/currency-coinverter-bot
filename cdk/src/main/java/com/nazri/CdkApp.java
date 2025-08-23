@@ -5,6 +5,7 @@ import com.nazri.stack.APIGatewayStack;
 import com.nazri.stack.DynamoDBStack;
 import com.nazri.stack.LambdaStack;
 import com.nazri.util.Constant;
+import com.nazri.util.EnvironmentUtil;
 import software.amazon.awscdk.App;
 
 /**
@@ -28,7 +29,7 @@ public class CdkApp {
         App app = new App();
 
         // Get environment from context or default to dev
-        String environment = normalizeEnvironment((String) app.getNode().tryGetContext("env"));
+        String environment = EnvironmentUtil.normalizeEnvironment((String) app.getNode().tryGetContext("env"));
         System.out.println("Deploying to environment: " + environment);
 
         StackConfig stackConfig = getStackConfig(environment);
@@ -55,27 +56,6 @@ public class CdkApp {
         );
 
         app.synth();
-    }
-
-    /**
-     * Normalizes the environment string to supported values.
-     * 
-     * @param env the environment string from context
-     * @return normalized environment (DEV or PRD)
-     */
-    public static String normalizeEnvironment(String env) {
-        if (env == null || env.trim().isEmpty()) {
-            System.out.println("No environment specified, defaulting to: " + Constant.DEV);
-            return Constant.DEV;
-        }
-        
-        String normalized = env.trim().toLowerCase();
-        if (Constant.PRD.equals(normalized)) {
-            return Constant.PRD;
-        } else {
-            System.out.println("Environment '" + env + "' not recognized as production, using: " + Constant.DEV);
-            return Constant.DEV;
-        }
     }
 
     /**
