@@ -31,7 +31,7 @@ public class CurrencyService {
      * Converts an amount from one currency to multiple target currencies.
      * Implements caching, circuit breaker, and retry logic for Lambda optimization.
      *
-     * @param amount The amount to convert (must be positive and <= 1,000,000)
+     * @param amount The amount to convert (must be positive)
      * @param fromCurrency Source currency code or country name
      * @param toCurrencies List of target currency codes (max 10)
      * @return Map of currency codes to converted amounts

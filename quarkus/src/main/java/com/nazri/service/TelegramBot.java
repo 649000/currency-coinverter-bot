@@ -118,18 +118,34 @@ public class TelegramBot extends TelegramWebhookBot {
      */
     private void processRegularMessage(Message message) {
         log.infof("Processing Regular Message: %s", message.getText());
-        message.setText("/convert " + message.getText());
-        processCommand(message);
+        try {
+            message.setText("/convert " + message.getText());
+            processCommand(message);
+        } catch (Exception e) {
+            log.error("Error processing regular message", e);
+            sendErrorMessage(message.getChatId(), "Failed to process message");
+        }
     }
 
     /**
-     * Process Location sent by user
-     * @param message
+     * Process Location sent by user by converting coordinates to country code.
+     *
+     * @param message The location message to process
      */
     private void processLocation(Message message) {
-        String country = Coordinates2Country.country(message.getLocation().getLatitude(), message.getLocation().getLongitude());
-        message.setText("/from " + country);
-        processCommand(message);
+        try {
+            String country = Coordinates2Country.country(message.getLocation().getLatitude(),
+                    message.getLocation().getLongitude());
+            if (country != null && !country.isEmpty()) {
+                message.setText("/from " + country);
+                processCommand(message);
+            } else {
+                sendErrorMessage(message.getChatId(), "Error determining country");
+            }
+        } catch (Exception e) {
+            log.error("Error processing location", e);
+            sendErrorMessage(message.getChatId(), "Failed to process location data");
+        }
     }
 
     /**
