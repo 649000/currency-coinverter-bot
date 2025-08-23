@@ -33,7 +33,7 @@ public class ConstantTest {
     @Test
     public void testConstantClassCannotBeInstantiated() {
         // This test verifies the private constructor prevents instantiation
-        assertThrows(InstantiationException.class, () -> {
+        assertThrows(IllegalAccessException.class, () -> {
             Constant.class.getDeclaredConstructor().newInstance();
         });
     }
