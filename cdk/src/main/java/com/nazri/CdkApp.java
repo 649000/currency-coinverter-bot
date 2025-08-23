@@ -28,13 +28,8 @@ public class CdkApp {
         App app = new App();
 
         // Get environment from context or default to dev
-        String environment = (String) app.getNode().tryGetContext("env");
-
-        if (environment.equalsIgnoreCase(Constant.PRD)) {
-            environment = Constant.PRD;
-        } else {
-            environment = Constant.DEV;
-        }
+        String environment = normalizeEnvironment((String) app.getNode().tryGetContext("env"));
+        System.out.println("Deploying to environment: " + environment);
 
         StackConfig stackConfig = getStackConfig(environment);
 
@@ -60,6 +55,27 @@ public class CdkApp {
         );
 
         app.synth();
+    }
+
+    /**
+     * Normalizes the environment string to supported values.
+     * 
+     * @param env the environment string from context
+     * @return normalized environment (DEV or PRD)
+     */
+    private static String normalizeEnvironment(String env) {
+        if (env == null || env.trim().isEmpty()) {
+            System.out.println("No environment specified, defaulting to: " + Constant.DEV);
+            return Constant.DEV;
+        }
+        
+        String normalized = env.trim().toLowerCase();
+        if (Constant.PRD.equals(normalized)) {
+            return Constant.PRD;
+        } else {
+            System.out.println("Environment '" + env + "' not recognized as production, using: " + Constant.DEV);
+            return Constant.DEV;
+        }
     }
 
     /**
