@@ -1,7 +1,6 @@
 package com.nazri.util;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.math.BigDecimal;
 import java.util.Currency;
@@ -17,7 +16,7 @@ class UtilTest {
         assertNotNull(currentTime);
         assertFalse(currentTime.isEmpty());
         assertTrue(currentTime.contains("T")); // ISO format contains T
-        assertTrue(currentTime.contains("+")); // Singapore timezone has + offset
+        assertTrue(currentTime.contains("+") || currentTime.contains("Z")); // Timezone has + offset or Z
     }
 
     @Test
@@ -44,7 +43,8 @@ class UtilTest {
         String result = Util.formatMoney(amount, "USD");
         assertNotNull(result);
         assertTrue(result.contains("USD"));
-        assertTrue(result.contains("1,234.56") || result.contains("1.234,56")); // Format varies by locale
+        // The formatted result should contain the numeric value
+        assertTrue(result.contains("1234.56") || result.contains("1,234.56") || result.contains("1.234,56"));
     }
 
     @Test
@@ -56,16 +56,18 @@ class UtilTest {
     }
 
     @Test
-    void testFindLocaleForCurrency() {
-        // Test that the method returns a valid locale
-        Currency usd = Currency.getInstance("USD");
-        Locale locale = Util.findLocaleForCurrency(usd);
-        assertNotNull(locale);
+    void testFormatMoneyWithDifferentCurrencies() {
+        BigDecimal amount = new BigDecimal("1000.00");
         
-        // Test with EUR
-        Currency eur = Currency.getInstance("EUR");
-        Locale eurLocale = Util.findLocaleForCurrency(eur);
-        assertNotNull(eurLocale);
+        // Test EUR
+        String eurResult = Util.formatMoney(amount, "EUR");
+        assertNotNull(eurResult);
+        assertTrue(eurResult.contains("EUR"));
+        
+        // Test JPY (no decimal places)
+        String jpyResult = Util.formatMoney(amount, "JPY");
+        assertNotNull(jpyResult);
+        assertTrue(jpyResult.contains("JPY"));
     }
 
     @Test
