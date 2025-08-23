@@ -11,8 +11,20 @@ import java.time.format.DateTimeFormatter;
 import java.util.Currency;
 import java.util.Locale;
 
+/**
+ * Utility class providing helper methods for currency conversion operations.
+ * 
+ * This class offers methods for formatting money values, validating numeric input,
+ * and finding appropriate locales for currency formatting. It also provides
+ * functionality for retrieving emoji flags for currency codes.
+ */
 public class Util {
 
+    /**
+     * Gets the current time in Singapore timezone formatted as ISO offset date time.
+     * 
+     * @return Current time as ISO formatted string (e.g., "2023-12-01T10:30:45+08:00")
+     */
     public static String getCurrentTime() {
         return Instant.now().atZone(ZoneId.of("Asia/Singapore")).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
@@ -90,6 +102,16 @@ public class Util {
         return Locale.US;
     }
 
+    /**
+     * Retrieves the emoji flag for a given currency code from configuration.
+     * 
+     * Looks up the emoji flag using the configuration property "currency.{currencyCode}"
+     * (case insensitive). Returns a default money bag emoji "💰" if no configuration
+     * is found for the currency code.
+     * 
+     * @param currencyCode The currency code to get emoji flag for (e.g., "USD", "EUR")
+     * @return The emoji flag for the currency code or default money bag emoji
+     */
     public static String getEmojiFlag(String currencyCode) {
         String propertyName = "currency." + currencyCode.toLowerCase();
         return ConfigProvider.getConfig()
