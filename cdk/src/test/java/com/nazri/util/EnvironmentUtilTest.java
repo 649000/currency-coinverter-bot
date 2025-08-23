@@ -40,7 +40,7 @@ public class EnvironmentUtilTest {
      */
     @Test
     public void testEnvironmentUtilCannotBeInstantiated() {
-        assertThrows(UnsupportedOperationException.class, () -> {
+        assertThrows(IllegalAccessException.class, () -> {
             EnvironmentUtil.class.getDeclaredConstructor().newInstance();
         });
     }

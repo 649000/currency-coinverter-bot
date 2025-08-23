@@ -3,8 +3,6 @@ package com.nazri.util;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.util.Currency;
-import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -58,12 +56,12 @@ class UtilTest {
     @Test
     void testFormatMoneyWithDifferentCurrencies() {
         BigDecimal amount = new BigDecimal("1000.00");
-        
+
         // Test EUR
         String eurResult = Util.formatMoney(amount, "EUR");
         assertNotNull(eurResult);
         assertTrue(eurResult.contains("EUR"));
-        
+
         // Test JPY (no decimal places)
         String jpyResult = Util.formatMoney(amount, "JPY");
         assertNotNull(jpyResult);
