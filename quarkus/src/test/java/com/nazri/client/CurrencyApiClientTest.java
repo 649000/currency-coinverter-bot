@@ -9,8 +9,8 @@ import org.mockito.Mockito;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.is;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
@@ -32,12 +32,13 @@ public class CurrencyApiClientTest {
         
         when(currencyApiClient.getExchangeRates(currency)).thenReturn(mockResponse);
 
-        // When & Then
+        // When
         Map<String, Object> result = currencyApiClient.getExchangeRates(currency);
         
-        // Verify
+        // Then
         Mockito.verify(currencyApiClient, Mockito.times(1)).getExchangeRates(currency);
-        assert(result.get("usd") != null);
+        assertNotNull(result);
+        assertNotNull(result.get("usd"));
     }
 
     @Test
@@ -52,11 +53,12 @@ public class CurrencyApiClientTest {
         
         when(currencyApiClient.getExchangeRates(currency)).thenReturn(mockResponse);
 
-        // When & Then
+        // When
         Map<String, Object> result = currencyApiClient.getExchangeRates(currency);
         
-        // Verify
+        // Then
         Mockito.verify(currencyApiClient, Mockito.times(1)).getExchangeRates(currency);
-        assert(result.get("eur") != null);
+        assertNotNull(result);
+        assertNotNull(result.get("eur"));
     }
 }
