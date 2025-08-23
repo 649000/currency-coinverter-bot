@@ -86,8 +86,8 @@ public class Util {
      * @param currency The Currency to find a locale for
      * @return The most appropriate Locale
      */
-    @CacheResult(cacheName = "currency-locales")
-    private static Locale findLocaleForCurrency(Currency currency) {
+//    @CacheResult(cacheName = "currency-locales")
+    public static Locale findLocaleForCurrency(Currency currency) {
         Locale[] allLocales = Locale.getAvailableLocales();
         for (Locale locale : allLocales) {
             try {
@@ -101,6 +101,27 @@ public class Util {
         }
         return Locale.US;
     }
+
+//    private static Locale findLocaleForCurrency(Currency currency) {
+//        // Get all available locales
+//        Locale[] allLocales = Locale.getAvailableLocales();
+//
+//        // First try: Find a locale where this is the primary currency
+//        for (Locale locale : allLocales) {
+//            try {
+//                if (Currency.getInstance(locale).getCurrencyCode()
+//                        .equals(currency.getCurrencyCode())) {
+//                    return locale;
+//                }
+//            } catch (IllegalArgumentException e) {
+//                // Skip locales without currency information
+//                continue;
+//            }
+//        }
+//
+//        // Fallback to US locale if no matching locale found
+//        return Locale.US;
+//    }
 
     /**
      * Retrieves the emoji flag for a given currency code from configuration.
