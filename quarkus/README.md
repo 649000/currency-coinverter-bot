@@ -77,7 +77,7 @@ mvn package -Dnative -Dquarkus.native.container-build=true
 
 ## API Endpoints
 
-- `POST /webhook` - Telegram webhook endpoint
+- `POST /api/telegram/webhook` - Telegram webhook endpoint
 
 ## Testing
 
