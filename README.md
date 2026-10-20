@@ -4,61 +4,79 @@ This repository contains a Telegram Currency Conversion Bot built with a focus o
 
 ## Features
 
-- **Real-time Currency Conversion**: Users can define their input and output currencies via chat commands. Upon entering a numerical value, the bot performs the conversion based on pre-defined rates.
-- **Efficient Communication**: Uses Telegram webhooks instead of polling for enhanced efficiency and reduced latency.
-- **Scalable Serverless Architecture**: Built with AWS Lambda and API Gateway, ensuring high availability and low operational overhead.
-- **Infrastructure as Code**: The project infrastructure is managed using AWS Cloud Development Kit (CDK) for repeatability and ease of updates.
-- **Blazing Startup Time**: Compiled using GraalVM creating native images that dramatically reduce AWS Lambda cold start time
+- **Live Currency Conversion**: Fetches real-time exchange rates via Fawaz Ahmed's Currency API with support for 150+ fiat currencies and countries.
+- **Smart Country & Geolocation Resolution**: Accepts ISO currency codes (e.g., `USD`, `SGD`), country names (e.g., `Malaysia`, `Japan`), or Telegram GPS location pins (automatically converted to country codes via `coordinates2country`).
+- **Interactive Inline UI**: Rich Telegram inline keyboards featuring quick amount selection (`10`, `50`, `100`, `500`) and instant multiplier shortcuts (`1x`, `10x`, `100x`).
+- **Resilient & Cached**: Built with Quarkus Caffeine Cache (15-minute TTL) and SmallRye Fault Tolerance (Circuit Breaker, Retries, Timeouts) to prevent cascading failures.
+- **Efficient Communication**: Uses Telegram webhooks instead of polling for enhanced efficiency, lower latency, and serverless compatibility.
+- **Scalable Serverless Architecture**: Built with AWS Lambda and HTTP API Gateway, ensuring high availability and zero idle costs.
+- **Infrastructure as Code**: The full cloud infrastructure is declared in Java using AWS Cloud Development Kit (CDK).
+- **Sub-Second Cold Starts**: Compiled with GraalVM to an ARM64 Linux native executable (`provided.al2023`), drastically reducing Lambda cold start overhead.
 
 ## How to Use
 
 ### Quick Start
 1. Start a conversation with [@CurrencyCoinvertBot](https://t.me/CurrencyCoinvertBot)
 2. Send `/start` to begin
-3. Set your input currency: `/from USD`
-4. Set your output currency: `/to SGD`
-5. Send any number (e.g., `100`) to get instant conversion
+3. Set your input currency: `/from USD` (or share your GPS location pin)
+4. Set your output currency: `/to SGD` (add up to 3 target currencies)
+5. Send any number (e.g., `100`) to get instant conversion with interactive multipliers
 
 ### Available Commands
 - `/start` - Welcome message and setup instructions
-- `/from <currency>` - Set input currency (e.g., `/from USD`, `/from Malaysia`)
-- `/to <currency>` - Set output currency (e.g., `/to SGD`, `/to Singapore`)
+- `/from <currency|country>` - Set input currency (e.g., `/from USD`, `/from Malaysia`, or send location)
+- `/to <currency|country>` - Set output currency (e.g., `/to SGD`, `/to Singapore`)
+- `/convert <amount>` - Convert a specific amount (or simply type a number like `100`)
+- `/getcurrencies` - Display your currently saved base and target currencies
+- `/deletecurrency` - Remove saved target currencies via interactive buttons
 - `/help` - Show all available commands
-- `/deletecurrency` - Remove saved output currencies
-- `/getcurrencies` - Get saved input and output currencies
 
 ## Technology Stack
 
-| Component                 | Technology                              |
-|---------------------------|-----------------------------------------|
-| **Programming Language**  | Java                                   |
-| **Framework**             | Quarkus                                |
-| **Hosting**               | AWS Lambda                             |
-| **API Management**        | AWS HTTP API Gateway                   |
-| **Database**              | AWS DynamoDB                           |
-| **IaC Tool**              | AWS Cloud Development Kit (CDK)        |
-| **Compiler**              | GraalVM for native image compilation   |
+| Component                 | Technology                                                    |
+|---------------------------|---------------------------------------------------------------|
+| **Programming Language**  | Java 21                                                       |
+| **Framework**             | Quarkus 3.16                                                  |
+| **Hosting**               | AWS Lambda (ARM64, `provided.al2023` / `java21`)              |
+| **API Management**        | AWS HTTP API Gateway (v2)                                     |
+| **Database**              | AWS DynamoDB (AWS SDK v2 Enhanced Client)                     |
+| **Exchange Rate Provider**| Fawaz Ahmed Currency API (`latest.currency-api.pages.dev`)   |
+| **Caching & Resilience**  | Caffeine Cache, MicroProfile Fault Tolerance (Circuit Breaker)|
+| **IaC Tool**              | AWS Cloud Development Kit (CDK v2) in Java                    |
+| **Compiler**              | GraalVM Native Image                                          |
 
 ## Project Structure
 
 ```
 ├── cdk/        # AWS CDK infrastructure code
-│   ├── src/main/java/
+│   ├── src/main/java/com/nazri/
+│   │   ├── config/StackConfig.java
+│   │   ├── stack/ (APIGatewayStack, DynamoDBStack, LambdaStack)
+│   │   └── CdkApp.java
 │   └── cdk.json
 ├── quarkus/    # Quarkus application
-│   ├── src/main/java/
+│   ├── src/main/java/com/nazri/
+│   │   ├── client/       # MicroProfile REST Client
+│   │   ├── command/      # Command pattern implementations & registry
+│   │   ├── controller/   # Webhook endpoint (/api/telegram/webhook)
+│   │   ├── model/        # DynamoDB User entity & Telegram responses
+│   │   ├── repository/   # DynamoDB repository
+│   │   ├── service/      # Currency, Telegram bot, User, and Message services
+│   │   └── util/         # Helper functions & inline keyboard builder
 │   └── pom.xml
+├── pom.xml     # Root reactor Maven project
 └── README.md
 ```
 
 ## Architecture
 
-The project is designed as a serverless system to ensure cost efficiency and scalability. Below is an overview of the architecture:
+The project is designed as an event-driven serverless architecture for cost efficiency and near-instant scalability:
 
-1. **AWS API Gateway**: Routes incoming requests from Telegram to the Quarkus app hosted on AWS Lambda.
-2. **AWS Lambda**: Hosts the Quarkus app, handling incoming updates from the API Gateway and executes business logic
-4. **AWS DynamoDB**: Serves as the NoSQL database for storing user preferences, such as input and output currencies.
-5. **AWS CDK**: Manages the infrastructure as code, ensuring consistent deployments.
+1. **Telegram Webhook**: Telegram pushes updates to an **AWS HTTP API Gateway** endpoint.
+2. **AWS Lambda (Quarkus Native)**: Routes incoming updates to `TelegramBot` and executes business logic in sub-second time.
+3. **Currency API & Cache**: Fetches live exchange rates with a 15-minute Caffeine cache and fallback circuit breaking.
+4. **AWS DynamoDB**: Stores user preferences (base currency, target currencies, timestamps) using single-table design.
+5. **AWS CDK**: Orchestrates reproducible, type-safe infrastructure as code.
 
 ### Architecture Diagram
 
@@ -68,44 +86,39 @@ The project is designed as a serverless system to ensure cost efficiency and sca
 
 ### Prerequisites
 
-- Node.js and npm installed (for AWS CDK)
-- AWS CDK installed (`npm install -g aws-cdk`)
-- AWS CLI configured
-- GraalVM installed for native image compilation
-- Java 17+
-- Docker
+- Java 21+
+- Node.js & npm (for AWS CDK)
+- AWS CDK CLI (`npm install -g aws-cdk`)
+- AWS CLI configured with active credentials
+- Docker (for GraalVM containerized native builds)
 
+### Running Tests
+
+```bash
+# Run tests across all modules (CDK + Quarkus)
+mvn test
+```
 
 ## Key Technical Decisions & Learnings
 
 ### Why Quarkus over Spring Boot?
-- **Cold Start Performance**: 10x faster Lambda cold starts with native compilation
-- **Memory Efficiency**: 50% lower memory footprint
-- **Developer Experience**: Live reload and excellent AWS Lambda integration
+- **Cold Start Performance**: 10x faster Lambda cold starts with native compilation (~150ms vs ~2000ms on JVM)
+- **Memory Efficiency**: ~50% lower memory footprint, lowering AWS Lambda execution costs
+- **Developer Experience**: Fast build times, dev mode, and seamless AWS Lambda HTTP integration
 
 ### DynamoDB Design Patterns
-- **Single Table Design**: All entities in one table with composite keys
-- **Access Pattern First**: Designed schema around query patterns, not entities
-- **GSI Strategy**: Used Global Secondary Indexes for alternate access patterns
+- **Single Table Design**: User entities stored with `chatId` partition key
+- **Enhanced Client**: Type-safe annotations (`@DynamoDbBean`, `@DynamoDbPartitionKey`)
+- **Access Pattern First**: Schema tailored to frequent lookup and update patterns
 
 ### Infrastructure Choices
-- **AWS CDK over Terraform**: Type-safe infrastructure with IDE support
-- **HTTP API vs REST API**: Lower latency and cost for simple routing needs
-
-### Transitioning from Relational Databases to DynamoDB
-As someone with a relational database background, I initially found it challenging to adapt to DynamoDB's NoSQL design principles. Understanding the importance of access patterns and designing the schema to support these patterns was a significant learning curve. This experience underscored the necessity of thinking ahead about the app's requirements, which contrasts with the flexibility typically associated with agile development.
-
-### Adopting Quarkus
-Quarkus proved to be an excellent choice for building a lightweight, serverless application. Its native image compilation using GraalVM significantly reduced Lambda's cold start times, resulting in faster response times and better scalability.
-
-### Implementing IaC with AWS CDK
-Using AWS CDK simplified infrastructure management and made deployments seamless. It reinforced my belief in the power of IaC tools for creating and maintaining robust cloud environments.
+- **AWS CDK over Terraform**: Type-safe infrastructure in Java with IDE autocompletion and compile-time validation
+- **HTTP API vs REST API**: Significantly lower latency and cost for simple routing needs
 
 ## Future Enhancements
-1. Integrate live exchange rates using a currency API (e.g., OpenExchangeRates or XE).
-2. Implement caching layer for frequently used conversions.
-3. Implement rate-limiting to prevent abuse of the bot.
-4.  Expand to support other chat platforms like Slack or Discord.
+1. Implement rate-limiting per chat ID to prevent bot spam.
+2. Historical exchange rate charts and trends.
+3. Expand bot support to other platforms like Slack or Discord.
 
 ## Conclusion
 Building this currency converter bot taught me a lot about serverless architecture and cloud development. The switch from Spring to Quarkus, and learning DynamoDB coming from a SQL background, were challenging but rewarding. While there's still room for improvement, I'm happy with how the project turned out as it works reliably, starts up quickly, and serves its purpose well.
