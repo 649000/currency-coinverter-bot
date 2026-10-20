@@ -38,6 +38,13 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.0</version>
+                <configuration>
+                    <environmentVariables>
+                        <CURRENCYCOINVERTER_TELEGRAM_BOT_USERNAME>test_bot_username</CURRENCYCOINVERTER_TELEGRAM_BOT_USERNAME>
+                        <CURRENCYCOINVERTER_TELEGRAM_BOT_TOKEN>test_bot_token</CURRENCYCOINVERTER_TELEGRAM_BOT_TOKEN>
+                        <CURRENCYCOINVERTER_TELEGRAM_BOT_URL>https://test.example.com/webhook</CURRENCYCOINVERTER_TELEGRAM_BOT_URL>
+                    </environmentVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>

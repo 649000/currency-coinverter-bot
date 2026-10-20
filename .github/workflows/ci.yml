@@ -57,6 +57,12 @@ jobs:
     # Standard 2-core x86_64 Ubuntu runner (costs 1x standard minutes, free on public repos)
     runs-on: ubuntu-latest
 
+    # Provide mock environment variables required by Constant.java during tests and cdk synth
+    env:
+      CURRENCYCOINVERTER_TELEGRAM_BOT_USERNAME: "ci_test_bot"
+      CURRENCYCOINVERTER_TELEGRAM_BOT_TOKEN: "ci_test_token"
+      CURRENCYCOINVERTER_TELEGRAM_BOT_URL: "https://ci.example.com/webhook"
+
     steps:
       # ------------------------------------------------------------------------
       # Step 1: Checkout the repository code
