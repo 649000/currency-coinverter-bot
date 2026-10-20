@@ -77,7 +77,7 @@
         <dependency>
             <groupId>io.github.coordinates2country</groupId>
             <artifactId>coordinates2country</artifactId>
-            <version>1.9</version>
+            <version>1.10</version>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
