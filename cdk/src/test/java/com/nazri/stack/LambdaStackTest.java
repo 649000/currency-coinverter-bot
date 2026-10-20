@@ -21,6 +21,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  */
 public class LambdaStackTest {
 
+    @org.junit.jupiter.api.BeforeAll
+    public static void setUpDummyAssetIfMissing() throws java.io.IOException {
+        java.io.File assetFile = new java.io.File("../quarkus/target/function.zip");
+        if (!assetFile.exists()) {
+            assetFile.getParentFile().mkdirs();
+            try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(new java.io.FileOutputStream(assetFile))) {
+                zos.putNextEntry(new java.util.zip.ZipEntry("bootstrap"));
+                zos.write("echo 'dummy asset for unit tests'".getBytes());
+                zos.closeEntry();
+            }
+        }
+    }
+
     @Test
     public void testLambdaStackCreatesNativeFunction_WhenGraalvmTrue() {
         App app = new App();

@@ -93,7 +93,17 @@ jobs:
           node-version: '20'
 
       # ------------------------------------------------------------------------
-      # Step 4: Run Automated Unit Tests across all modules (CDK & Quarkus)
+      # Step 4: Package Quarkus in JVM Mode
+      # ------------------------------------------------------------------------
+      # AWS CDK's LambdaStack references Code.fromAsset("../quarkus/target/function.zip").
+      # Building the Quarkus JVM function first ensures the asset zip is available for CDK.
+      # Packaging in standard JVM mode takes only ~5-10s (unlike native which takes 5 mins).
+      - name: Build Quarkus JVM Function Artifact
+        working-directory: ./quarkus
+        run: mvn package -DskipTests
+
+      # ------------------------------------------------------------------------
+      # Step 5: Run Automated Unit Tests across all modules (CDK & Quarkus)
       # ------------------------------------------------------------------------
       # Executes Surefire test runner on both reactor modules:
       # - cdk/src/test/java (validates CDK constructs, stack configuration, environment logic)
@@ -101,16 +111,6 @@ jobs:
       # Runtime: ~10 seconds.
       - name: Run Maven Tests (CDK + Quarkus)
         run: mvn test
-
-      # ------------------------------------------------------------------------
-      # Step 5: Package Quarkus in JVM Mode
-      # ------------------------------------------------------------------------
-      # AWS CDK's LambdaStack references Code.fromAsset("../quarkus/target/function.zip").
-      # For CDK synthesis to validate asset bundling without failing, this zip must exist.
-      # Packaging in standard JVM mode takes only ~5-10s (unlike native which takes 5 mins).
-      - name: Build Quarkus JVM Function Artifact
-        working-directory: ./quarkus
-        run: mvn package -DskipTests
 
       # ------------------------------------------------------------------------
       # Step 6: Install AWS CDK CLI
