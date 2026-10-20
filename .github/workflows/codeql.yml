@@ -84,7 +84,7 @@ jobs:
       # Initializes the CodeQL toolchain for Java analysis.
       # 'security-extended' includes additional security queries beyond the default suite.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: 'java-kotlin'
           queries: security-extended
@@ -103,6 +103,6 @@ jobs:
       # Runs QL queries against the generated database and uploads the SARIF
       # (Static Analysis Results Interchange Format) report to GitHub Security.
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:java-kotlin"
