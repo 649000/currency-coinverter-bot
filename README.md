@@ -1,5 +1,12 @@
 # Telegram Currency Conversion Bot
 
+[![CI](https://github.com/649000/currency-coinverter-bot/actions/workflows/ci.yml/badge.svg)](https://github.com/649000/currency-coinverter-bot/actions/workflows/ci.yml)
+[![Security Scan](https://github.com/649000/currency-coinverter-bot/actions/workflows/codeql.yml/badge.svg)](https://github.com/649000/currency-coinverter-bot/actions/workflows/codeql.yml)
+![Java 21](https://img.shields.io/badge/Java-21-blue?logo=openjdk&logoColor=white)
+![Quarkus](https://img.shields.io/badge/Quarkus-3.16-red?logo=quarkus&logoColor=white)
+![AWS CDK](https://img.shields.io/badge/AWS%20CDK-v2-FF9900?logo=amazon-aws&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+
 This repository contains a Telegram Currency Conversion Bot built with a focus on scalability, efficiency, and modern serverless technologies. It demonstrates my expertise in backend development, infrastructure as code (IaC), and handling NoSQL databases, while highlighting key learning experiences with frameworks and tools like Quarkus, AWS CDK, and DynamoDB.
 
 ## Features
