@@ -101,7 +101,7 @@ jobs:
       # Assumes the IAM Role configured in your AWS account for this GitHub repository.
       # No long-lived credentials (like IAM user secret keys) are required or stored.
       - name: Configure AWS Credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION || 'ap-southeast-1' }}
