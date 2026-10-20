@@ -1,0 +1,129 @@
+# ==============================================================================
+# GitHub Actions Workflow: Continuous Integration (CI)
+# ==============================================================================
+#
+# PURPOSE:
+# This workflow runs on every pull request and feature branch push.
+# Its purpose is fast feedback (< 2 minutes) to ensure that:
+#   1. All Java unit tests pass (CDK + Quarkus).
+#   2. The Quarkus application packages successfully in JVM mode.
+#   3. AWS CDK infrastructure constructs synthesize cleanly for both DEV and PRD.
+#
+# QUOTA & EFFICIENCY OPTIMIZATION:
+# - WE DO NOT COMPILE A GRAALVM NATIVE IMAGE HERE.
+#   A GraalVM native build takes 4-7 minutes and consumes significant CPU/RAM.
+#   Running native builds on every PR/commit would quickly exhaust GitHub Actions'
+#   free tier minutes (2,000 mins/month for private repos).
+# - FAST FEEDBACK: Running unit tests and JVM packaging takes ~1.5 minutes total.
+# - MAVEN CACHING: Dependencies (~/.m2/repository) are cached to avoid re-downloading.
+# - PATH FILTERING: Documentation and non-code edits do not trigger unnecessary runs.
+# - CONCURRENCY CANCELLATION: Pushing new commits automatically cancels previous runs.
+# ==============================================================================
+
+name: CI
+
+on:
+  # Run on pull requests targeting the main branch
+  pull_request:
+    branches: [ main ]
+    # Ignore edits to documentation files to conserve free CI minutes
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'docs/**'
+
+  # Run on pushes to main and feature branches
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'docs/**'
+
+  # Allows manually triggering this workflow from the GitHub Actions tab
+  workflow_dispatch:
+
+# Cancel any previously running workflow on the same branch when a new commit is pushed.
+# This prevents wasted runner minutes on outdated code.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-verify:
+    name: Test & Infrastructure Verification
+    # Standard 2-core x86_64 Ubuntu runner (costs 1x standard minutes, free on public repos)
+    runs-on: ubuntu-latest
+
+    steps:
+      # ------------------------------------------------------------------------
+      # Step 1: Checkout the repository code
+      # ------------------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ------------------------------------------------------------------------
+      # Step 2: Set up Java 21 JDK with Maven Caching
+      # ------------------------------------------------------------------------
+      # Using Eclipse Temurin JDK 21.
+      # The 'cache: maven' option automatically hashes all pom.xml files and
+      # restores ~/.m2/repository on subsequent runs, speeding up build time by 30-60s.
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # ------------------------------------------------------------------------
+      # Step 3: Set up Node.js for AWS CDK CLI
+      # ------------------------------------------------------------------------
+      # AWS CDK requires Node.js runtime to execute the CDK CLI tools.
+      - name: Set up Node.js for CDK
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ------------------------------------------------------------------------
+      # Step 4: Run Automated Unit Tests across all modules (CDK & Quarkus)
+      # ------------------------------------------------------------------------
+      # Executes Surefire test runner on both reactor modules:
+      # - cdk/src/test/java (validates CDK constructs, stack configuration, environment logic)
+      # - quarkus/src/test/java (validates services, controllers, commands, DynamoDB repo)
+      # Runtime: ~10 seconds.
+      - name: Run Maven Tests (CDK + Quarkus)
+        run: mvn test
+
+      # ------------------------------------------------------------------------
+      # Step 5: Package Quarkus in JVM Mode
+      # ------------------------------------------------------------------------
+      # AWS CDK's LambdaStack references Code.fromAsset("../quarkus/target/function.zip").
+      # For CDK synthesis to validate asset bundling without failing, this zip must exist.
+      # Packaging in standard JVM mode takes only ~5-10s (unlike native which takes 5 mins).
+      - name: Build Quarkus JVM Function Artifact
+        working-directory: ./quarkus
+        run: mvn package -DskipTests
+
+      # ------------------------------------------------------------------------
+      # Step 6: Install AWS CDK CLI
+      # ------------------------------------------------------------------------
+      - name: Install AWS CDK CLI
+        run: npm install -g aws-cdk
+
+      # ------------------------------------------------------------------------
+      # Step 7: Verify CDK CloudFormation Synthesis (DEV & PRD)
+      # ------------------------------------------------------------------------
+      # 'cdk synth' synthesizes the CDK constructs into CloudFormation templates in memory.
+      # It verifies:
+      #   - No cyclic dependencies between stacks (DynamoDB -> Lambda -> APIGateway)
+      #   - All IAM permissions, routes, and environment variables are valid
+      #   - No deployment to AWS actually occurs in this step.
+      - name: Verify CDK Synth for DEV Environment
+        working-directory: ./cdk
+        run: cdk synth -c env=dev
+
+      - name: Verify CDK Synth for PRD Environment
+        working-directory: ./cdk
+        run: cdk synth -c env=prd

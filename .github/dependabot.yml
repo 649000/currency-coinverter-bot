@@ -1,0 +1,45 @@
+# ==============================================================================
+# Dependabot Configuration (Dependency Security & SAST Scanning)
+# ==============================================================================
+#
+# PURPOSE:
+# Dependabot automatically scans your project dependencies for known CVEs
+# (Common Vulnerabilities and Exposures) and opens automated PRs with patches.
+#
+# QUOTA IMPACT:
+# - ZERO (0) GitHub Actions minutes consumed!
+# - Runs on GitHub's internal infrastructure, completely free.
+# ==============================================================================
+
+version: 2
+updates:
+  # ----------------------------------------------------------------------------
+  # 1. Maven Dependencies for Root Project (including cdk & quarkus reactor)
+  # ----------------------------------------------------------------------------
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+      timezone: "Asia/Singapore"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "security"
+
+  # ----------------------------------------------------------------------------
+  # 2. GitHub Actions Workflow Dependencies
+  # ----------------------------------------------------------------------------
+  # Keeps actions like actions/checkout, actions/setup-java updated to secure versions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+      timezone: "Asia/Singapore"
+    open-pull-requests-limit: 3
+    labels:
+      - "ci"
+      - "dependencies"

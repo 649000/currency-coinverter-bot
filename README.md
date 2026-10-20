@@ -99,6 +99,17 @@ The project is designed as an event-driven serverless architecture for cost effi
 mvn test
 ```
 
+## CI/CD & Security Pipeline
+
+This project implements an automated CI/CD and security pipeline using **GitHub Actions** optimized for serverless deployments and quota efficiency:
+
+- **Continuous Integration (`ci.yml`)**: Runs on pushes to `main`, PRs, and feature branches. Executes unit tests (`mvn test`), packages JVM function artifacts, and verifies CloudFormation template synthesis (`cdk synth`) in **~1.5 minutes** without building heavy native images.
+- **Security & SAST Scanning (`codeql.yml` & `dependabot.yml`)**: CodeQL semantic analysis scans Java code for injection flaws, tainted data flows, and CWE vulnerabilities. Dependabot monitors Maven and GitHub Actions dependencies for CVEs with zero CI minute consumption.
+- **Manual / Safe Deployments (`deploy-dev.yml` & `deploy-prd.yml`)**: Deployments to DEV (JVM) and PRD (GraalVM ARM64 native image) are on-demand and triggerable via Git release tags (`v*.*.*`) or manual UI dispatch (`workflow_dispatch`).
+- **Passwordless Security**: Uses **AWS IAM OpenID Connect (OIDC)** for temporary STS credential assumption instead of long-lived access keys.
+
+📖 For complete documentation on pipeline architecture, quota calculations, AWS OIDC setup, and deployment guides, see the [CI/CD Architecture & GitHub Actions Guide](docs/ci-cd-guide.md).
+
 ## Key Technical Decisions & Learnings
 
 ### Why Quarkus over Spring Boot?

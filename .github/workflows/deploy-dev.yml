@@ -1,0 +1,128 @@
+# ==============================================================================
+# GitHub Actions Workflow: Continuous Deployment - Development (DEV)
+# ==============================================================================
+#
+# PURPOSE:
+# Automatically deploys the application to the AWS DEV environment whenever
+# code is merged into the 'main' branch.
+#
+# ARCHITECTURAL DECISIONS & SAVINGS:
+# 1. ENVIRONMENT PROTECTION (METHOD 2):
+#    This job targets 'environment: dev'. In your GitHub repository settings
+#    (Settings -> Environments -> dev), you can enable 'Required reviewers'.
+#    When enabled, GitHub pauses execution and will NEVER touch AWS until you
+#    explicitly click "Approve and deploy" in the GitHub web UI.
+# 2. JVM RUNTIME IN DEV:
+#    In StackConfig.java, the DEV environment sets 'graalvm = false', which instructs
+#    LambdaStack to provision a Lambda function using Java 21 runtime (Runtime.JAVA_21).
+#    Packaging Quarkus for JVM takes only ~10 seconds, compared to 5 minutes for native!
+# 3. AWS OIDC AUTHENTICATION (NO LONG-LIVED KEYS):
+#    Instead of storing permanent AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY secrets,
+#    this workflow requests a temporary AWS STS token via OpenID Connect (OIDC).
+#    This eliminates credential rotation burdens and prevents credential leaks.
+# ==============================================================================
+
+name: Deploy - DEV
+
+on:
+  # Manual trigger only (prevents accidental deployment failures until AWS OIDC is configured)
+  workflow_dispatch:
+    inputs:
+      confirm_deploy:
+        description: 'Type "deploy" to confirm deployment to DEV'
+        required: true
+        default: 'deploy'
+
+# Ensure only one deployment runs at a time on main to prevent race conditions in CloudFormation
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: false
+
+# OIDC requires permission to write the id-token
+permissions:
+  id-token: write # Required for requesting the JWT token from GitHub OIDC provider
+  contents: read  # Required for actions/checkout
+
+jobs:
+  deploy-dev:
+    name: Deploy to DEV Environment (JVM Mode)
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+      # ------------------------------------------------------------------------
+      # Step 1: Checkout repository code
+      # ------------------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ------------------------------------------------------------------------
+      # Step 2: Set up Java 21 with Maven caching
+      # ------------------------------------------------------------------------
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # ------------------------------------------------------------------------
+      # Step 3: Set up Node.js for AWS CDK CLI
+      # ------------------------------------------------------------------------
+      - name: Set up Node.js for CDK
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ------------------------------------------------------------------------
+      # Step 4: Run automated tests before deploying
+      # ------------------------------------------------------------------------
+      - name: Run Maven Tests
+        run: mvn test
+
+      # ------------------------------------------------------------------------
+      # Step 5: Package Quarkus in JVM Mode
+      # ------------------------------------------------------------------------
+      # Quarkus Maven Plugin packages the app into target/function.zip.
+      # Because graalvm=false in DEV, this contains the fast JVM runner jar.
+      - name: Build Quarkus JVM Function Artifact
+        working-directory: ./quarkus
+        run: mvn package -DskipTests
+
+      # ------------------------------------------------------------------------
+      # Step 6: Install AWS CDK CLI
+      # ------------------------------------------------------------------------
+      - name: Install AWS CDK CLI
+        run: npm install -g aws-cdk
+
+      # ------------------------------------------------------------------------
+      # Step 7: Authenticate with AWS via OIDC (Role Assumption)
+      # ------------------------------------------------------------------------
+      # Assumes the IAM Role configured in your AWS account for this GitHub repository.
+      # No long-lived credentials (like IAM user secret keys) are required or stored.
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'ap-southeast-1' }}
+          role-session-name: GitHubActions-CurrencyCoinverter-DevDeploy
+
+      # ------------------------------------------------------------------------
+      # Step 8: Deploy All CDK Stacks to AWS DEV Environment
+      # ------------------------------------------------------------------------
+      # Deploys in order:
+      #   1. DynamoDB table (currencycoinverter-dynamodb-stack)
+      #   2. HTTP API Gateway (currencycoinverter-api-stack)
+      #   3. Lambda function & Webhook route (currencycoinverter-api-lambda-stack)
+      #
+      # Parameters:
+      #   -c env=dev : Instructs CdkApp & StackConfig to use the DEV configuration.
+      #   --require-approval never : Enables non-interactive execution in automated CI/CD.
+      - name: Deploy CDK Stacks (DEV)
+        working-directory: ./cdk
+        env:
+          CURRENCYCOINVERTER_TELEGRAM_BOT_USERNAME: ${{ secrets.CURRENCYCOINVERTER_TELEGRAM_BOT_USERNAME }}
+          CURRENCYCOINVERTER_TELEGRAM_BOT_TOKEN: ${{ secrets.CURRENCYCOINVERTER_TELEGRAM_BOT_TOKEN }}
+          CURRENCYCOINVERTER_TELEGRAM_BOT_URL: ${{ secrets.CURRENCYCOINVERTER_TELEGRAM_BOT_URL }}
+        run: |
+          cdk deploy --all -c env=dev --require-approval never

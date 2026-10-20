@@ -1,0 +1,156 @@
+# ==============================================================================
+# GitHub Actions Workflow: Continuous Deployment - Production (PRD)
+# ==============================================================================
+#
+# PURPOSE:
+# Compiles a GraalVM native executable and deploys the production infrastructure
+# and ARM64 Lambda function to AWS.
+#
+# TRIGGERS:
+# 1. Pushing a version tag: e.g., git tag v1.0.0 && git push origin v1.0.0
+# 2. Manual click in GitHub UI: Actions -> Deploy - Production -> "Run workflow"
+#
+# WHY THIS IS SAFE (ENVIRONMENT PROTECTION):
+# - This job targets 'environment: prd'. In your GitHub repository settings
+#   (Settings -> Environments -> prd), you can configure 'Required reviewers'.
+#   GitHub automatically pauses the pipeline before running any deployment steps,
+#   requiring you to click "Approve and deploy" in the UI. No accidental deployments!
+#
+# WHY THIS SAVES YOUR GITHUB ACTIONS QUOTA:
+# - Native compilation takes ~4 to 6 minutes.
+# - By triggering this ONLY on tagged releases or deliberate manual button presses,
+#   you never waste minutes on everyday intermediate commits.
+# - If you deploy to production 4 times a month, this consumes only ~20-25 minutes
+#   of your 2,000 monthly minutes (~1% of your quota).
+#
+# WHY UBUNTU-24.04-ARM RUNNER?
+# - In LambdaStack.java, production uses:
+#       .architecture(Architecture.ARM_64)
+#       .runtime(Runtime.PROVIDED_AL2023)
+# - If an x86 runner tries to compile an ARM64 binary using QEMU Docker emulation,
+#   it takes 15-25 minutes due to instruction translation overhead!
+# - By using GitHub's native ARM64 runner ('runs-on: ubuntu-24.04-arm'), GraalVM
+#   compiles directly on ARM64 hardware with no emulation penalty in ~4-5 minutes.
+# ==============================================================================
+
+name: Deploy - Production (Native)
+
+on:
+  # Trigger on Git version tags (e.g. v1.0.0, v1.2.3, v2.0.0-rc1)
+  push:
+    tags:
+      - 'v*.*.*'
+
+  # Trigger manually via the GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      confirm_deploy:
+        description: 'Type "deploy" to confirm production release'
+        required: true
+        default: 'deploy'
+
+# Ensure only one production deployment runs at a time
+concurrency:
+  group: deploy-prd
+  cancel-in-progress: false
+
+# OIDC permissions for secure AWS token exchange
+permissions:
+  id-token: write # Required for AWS OIDC authentication
+  contents: read  # Required to checkout the code
+
+jobs:
+  deploy-prd:
+    name: Build Native Image & Deploy to PRD
+    # Uses GitHub's Linux ARM64 runner for native ARM64 compilation
+    runs-on: ubuntu-24.04-arm
+    environment: prd
+
+    steps:
+      # ------------------------------------------------------------------------
+      # Step 1: Safety check for manual trigger
+      # ------------------------------------------------------------------------
+      - name: Validate Manual Trigger Confirmation
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.confirm_deploy != 'deploy'
+        run: |
+          echo "Deployment aborted: Confirmation string did not match 'deploy'."
+          exit 1
+
+      # ------------------------------------------------------------------------
+      # Step 2: Checkout the tagged release code
+      # ------------------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ------------------------------------------------------------------------
+      # Step 3: Set up GraalVM / Mandrel for Native Image Compilation
+      # ------------------------------------------------------------------------
+      # Mandrel is Red Hat's downstream distribution of GraalVM, optimized specifically
+      # for Quarkus applications. Setting up GraalVM directly on the runner avoids the
+      # overhead of pulling a heavy 1.5GB builder container image.
+      - name: Set up GraalVM (Mandrel JDK 21)
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21'
+          distribution: 'mandrel'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          cache: 'maven'
+
+      # ------------------------------------------------------------------------
+      # Step 4: Set up Node.js for AWS CDK CLI
+      # ------------------------------------------------------------------------
+      - name: Set up Node.js for CDK
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ------------------------------------------------------------------------
+      # Step 5: Run Automated Unit Tests before Native Compilation
+      # ------------------------------------------------------------------------
+      - name: Run Maven Tests
+        run: mvn test
+
+      # ------------------------------------------------------------------------
+      # Step 6: Compile Quarkus Ahead-Of-Time (AOT) to Native Executable
+      # ------------------------------------------------------------------------
+      # -Dnative: Activates the Quarkus native build profile in quarkus/pom.xml.
+      # -DskipTests: Skips re-running unit tests already validated in Step 5.
+      # Result: Compiles to an ARM64 Linux ELF binary, adds AWS Lambda 'bootstrap'
+      #         entrypoint, and zips into quarkus/target/function.zip.
+      - name: Build Quarkus Native Executable (ARM64)
+        working-directory: ./quarkus
+        run: mvn package -Dnative -DskipTests
+
+      # ------------------------------------------------------------------------
+      # Step 7: Install AWS CDK CLI
+      # ------------------------------------------------------------------------
+      - name: Install AWS CDK CLI
+        run: npm install -g aws-cdk
+
+      # ------------------------------------------------------------------------
+      # Step 8: Authenticate with AWS via OIDC
+      # ------------------------------------------------------------------------
+      # Securely exchanges GitHub's OIDC token for short-lived AWS STS credentials.
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'ap-southeast-1' }}
+          role-session-name: GitHubActions-CurrencyCoinverter-PrdDeploy
+
+      # ------------------------------------------------------------------------
+      # Step 9: Deploy All CDK Stacks to AWS PRD Environment
+      # ------------------------------------------------------------------------
+      # -c env=prd sets StackConfig:
+      #   - graalvm = true
+      #   - runtime = provided.al2023 (custom native runtime)
+      #   - architecture = arm64
+      #   - environment tag = prd
+      - name: Deploy CDK Stacks (PRD)
+        working-directory: ./cdk
+        env:
+          CURRENCYCOINVERTER_TELEGRAM_BOT_USERNAME: ${{ secrets.CURRENCYCOINVERTER_TELEGRAM_BOT_USERNAME }}
+          CURRENCYCOINVERTER_TELEGRAM_BOT_TOKEN: ${{ secrets.CURRENCYCOINVERTER_TELEGRAM_BOT_TOKEN }}
+          CURRENCYCOINVERTER_TELEGRAM_BOT_URL: ${{ secrets.CURRENCYCOINVERTER_TELEGRAM_BOT_URL }}
+        run: |
+          cdk deploy --all -c env=prd --require-approval never
