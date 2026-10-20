@@ -60,7 +60,7 @@ jobs:
       # Step 2: Set up Java 21 with Maven caching
       # ------------------------------------------------------------------------
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: 'temurin'

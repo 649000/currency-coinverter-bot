@@ -71,7 +71,7 @@ jobs:
       # The 'cache: maven' option automatically hashes all pom.xml files and
       # restores ~/.m2/repository on subsequent runs, speeding up build time by 30-60s.
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: 'temurin'
