@@ -128,11 +128,25 @@ jobs:
         run: npm install -g aws-cdk
 
       # ------------------------------------------------------------------------
-      # Step 8: Authenticate with AWS via OIDC
+      # Step 8: Check if AWS OIDC Role is configured
+      # ------------------------------------------------------------------------
+      - name: Check AWS Configuration
+        id: check_aws
+        env:
+          AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+        run: |
+          if [ -n "$AWS_ROLE_ARN" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ------------------------------------------------------------------------
+      # Step 9: Authenticate with AWS via OIDC
       # ------------------------------------------------------------------------
       # Securely exchanges GitHub's OIDC token for short-lived AWS STS credentials.
       - name: Configure AWS Credentials (OIDC)
-        if: ${{ secrets.AWS_ROLE_ARN != '' }}
+        if: steps.check_aws.outputs.configured == 'true'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
@@ -140,7 +154,7 @@ jobs:
           role-session-name: GitHubActions-CurrencyCoinverter-PrdDeploy
 
       # ------------------------------------------------------------------------
-      # Step 9: Deploy All CDK Stacks to AWS PRD Environment
+      # Step 10: Deploy All CDK Stacks to AWS PRD Environment
       # ------------------------------------------------------------------------
       # -c env=prd sets StackConfig:
       #   - graalvm = true
@@ -148,7 +162,7 @@ jobs:
       #   - architecture = arm64
       #   - environment tag = prd
       - name: Deploy CDK Stacks (PRD)
-        if: ${{ secrets.AWS_ROLE_ARN != '' }}
+        if: steps.check_aws.outputs.configured == 'true'
         working-directory: ./cdk
         env:
           CURRENCYCOINVERTER_TELEGRAM_BOT_USERNAME: ${{ secrets.CURRENCYCOINVERTER_TELEGRAM_BOT_USERNAME }}
@@ -158,7 +172,7 @@ jobs:
           cdk deploy --all -c env=prd --require-approval never
 
       - name: Skip Deployment Notice
-        if: ${{ secrets.AWS_ROLE_ARN == '' }}
+        if: steps.check_aws.outputs.configured != 'true'
         run: |
-          echo "AWS deployment skipped: secrets.AWS_ROLE_ARN is not configured in repository secrets."
+          echo "AWS deployment skipped: AWS_ROLE_ARN secret is not configured in repository secrets."
           echo "Native ARM64 binary was built and validated successfully."
