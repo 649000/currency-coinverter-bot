@@ -299,8 +299,3 @@ DAST tools (like OWASP ZAP) send automated attacks against a running HTTP server
 - **Runtime**: `provided.al2023` (Custom Runtime on Amazon Linux 2023).
 - **Handler**: `not.used.for.native`.
 - **Cold start duration**: CloudWatch log entries will show `Init Duration: ~100-200 ms` instead of ~2,000 ms.
-
-### Q: How can I check how many free GitHub Actions minutes I have used this month?
-**A**:
-1. Go to your GitHub profile: **Settings** → **Billing and plans** → **Plans and usage**.
-2. Scroll to the **Usage this month** section to view your Actions minutes consumption and remaining quota.
