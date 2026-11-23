@@ -132,6 +132,7 @@ jobs:
       # ------------------------------------------------------------------------
       # Securely exchanges GitHub's OIDC token for short-lived AWS STS credentials.
       - name: Configure AWS Credentials (OIDC)
+        if: ${{ secrets.AWS_ROLE_ARN != '' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
@@ -147,6 +148,7 @@ jobs:
       #   - architecture = arm64
       #   - environment tag = prd
       - name: Deploy CDK Stacks (PRD)
+        if: ${{ secrets.AWS_ROLE_ARN != '' }}
         working-directory: ./cdk
         env:
           CURRENCYCOINVERTER_TELEGRAM_BOT_USERNAME: ${{ secrets.CURRENCYCOINVERTER_TELEGRAM_BOT_USERNAME }}
@@ -154,3 +156,9 @@ jobs:
           CURRENCYCOINVERTER_TELEGRAM_BOT_URL: ${{ secrets.CURRENCYCOINVERTER_TELEGRAM_BOT_URL }}
         run: |
           cdk deploy --all -c env=prd --require-approval never
+
+      - name: Skip Deployment Notice
+        if: ${{ secrets.AWS_ROLE_ARN == '' }}
+        run: |
+          echo "AWS deployment skipped: secrets.AWS_ROLE_ARN is not configured in repository secrets."
+          echo "Native ARM64 binary was built and validated successfully."
