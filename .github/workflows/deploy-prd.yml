@@ -36,12 +36,7 @@
 name: Deploy - Production (Native)
 
 on:
-  # Trigger on Git version tags (e.g. v1.0.0, v1.2.3, v2.0.0-rc1)
-  push:
-    tags:
-      - 'v*.*.*'
-
-  # Trigger manually via the GitHub Actions UI
+  # Manual trigger only (prevents accidental deployment when pushing release tags)
   workflow_dispatch:
     inputs:
       confirm_deploy:

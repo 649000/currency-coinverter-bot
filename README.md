@@ -2,8 +2,8 @@
 
 # Telegram Currency Conversion Bot
 
-[![CI](https://github.com/649000/currency-coinverter-bot/actions/workflows/ci.yml/badge.svg)](https://github.com/649000/currency-coinverter-bot/actions/workflows/ci.yml)
-[![Security Scan](https://github.com/649000/currency-coinverter-bot/actions/workflows/codeql.yml/badge.svg)](https://github.com/649000/currency-coinverter-bot/actions/workflows/codeql.yml)
+[![CI](https://github.com/649000/currency-coinverter-bot/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/649000/currency-coinverter-bot/actions/workflows/ci.yml)
+[![Security Scan](https://github.com/649000/currency-coinverter-bot/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/649000/currency-coinverter-bot/actions/workflows/codeql.yml)
 [![Coverage](https://img.shields.io/badge/coverage-JaCoCo-brightgreen)](https://github.com/649000/currency-coinverter-bot/actions/workflows/ci.yml)
 ![Java 21](https://img.shields.io/badge/Java-21-blue?logo=openjdk&logoColor=white)
 ![Quarkus](https://img.shields.io/badge/Quarkus-3.16-red?logo=quarkus&logoColor=white)
